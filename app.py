@@ -54,6 +54,9 @@ def init_db():
         ''')
         db.commit()
 
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# PAGE LOGIN & REGISTRASI 
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 @app.route("/")
 def login_temp():
     if "username" in session:
@@ -96,6 +99,10 @@ def register():
             return redirect("/register")
     return render_template("register.html")
 
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# PAGE DASHBOARD ADMIN DAN PELANGGAN
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
 @app.route("/guest")
 def guest_dashboard():
     if "username" not in session or session["username"] == "mastersandi":
@@ -116,7 +123,9 @@ def admin_dashboard():
     balance = user["balance"] if user else 0
     return render_template("dash_admin.html", username=username, balance=balance)
 
-# -------------------create account premium ----------------
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# PAGE CREATE AKUN VPN PREMIUM 
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 # Fungsi untuk mendapatkan jumlah pengguna (current) melalui SSH
 def get_current_users_vpn(hostname, username, password):
