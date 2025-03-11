@@ -292,23 +292,9 @@ def create_account():
         balance=new_balance
     )
 
-@app.route('/result')
-def result():
-    # Ambil data yang diterima dari URL dan tampilkan di result.html
-    device = request.args.get('device')
-    username = request.args.get('username')
-    expired = request.args.get('expired')
-    protocol = request.args.get('protocol')
-    output = request.args.get('output')
-
-    return render_template(
-        'result.html',
-        username=username,
-        expired=expired,
-        protocol=protocol,
-        device=device,
-        output=output,
-    )
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# RIWAYAT DAN DETAIL AKUN USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 @app.route('/riwayat', methods=['GET'])
 def riwayat():
@@ -327,7 +313,10 @@ def riwayat():
     )
     sessions_data = cursor.fetchall()
     return render_template('riwayat.html', sessions=sessions_data)
-#------------- add & delete server -----------
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# TAMBAH DAN HAPUS SERVER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 # Lokasi file server.json
 SERVER_FILE = "/root/project/server.json"
@@ -404,107 +393,10 @@ def delete_server():
         
         return redirect(url_for('delete_server'))
 
-#------------------- Fungsi Dor XL --------------
-# Path ke file list_xl.json
-DATA_FILE = '/root/project/list_xl.json'
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# TAMBAH SALDO USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-
-def ensure_data_file_exists():
-    """ Pastikan file list_xl.json ada, jika tidak, buat dengan data default. """
-    if not os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'w') as file:
-            json.dump({}, file, indent=4)
-
-
-# Endpoint untuk halaman utama
-@app.route('/list_xl')
-def list_xl():
-    return render_template('list_xl.html')
-
-
-# Endpoint untuk mendapatkan daftar paket
-@app.route('/get_packages', methods=['GET'])
-def get_packages():
-    try:
-        ensure_data_file_exists()
-        with open(DATA_FILE, 'r') as file:
-            data = json.load(file)
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# Endpoint untuk halaman tambah paket
-@app.route('/add_list_xl')
-def add_list_xl():
-    return render_template('add_list_xl.html')
-
-
-# Endpoint untuk menambahkan paket
-@app.route('/add_package', methods=['POST'])
-def add_package():
-    try:
-        ensure_data_file_exists()
-        new_package = request.json
-
-        with open(DATA_FILE, 'r') as file:
-            data = json.load(file)
-
-        data[new_package['name']] = new_package['detail']
-
-        with open(DATA_FILE, 'w') as file:
-            json.dump(data, file, indent=4)
-
-        return jsonify({"message": "Paket berhasil ditambahkan!"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# Endpoint untuk memperbarui paket
-@app.route('/update_package/<package_name>', methods=['PUT'])
-def update_package(package_name):
-    try:
-        ensure_data_file_exists()
-        updated_package = request.json
-
-        with open(DATA_FILE, 'r') as file:
-            data = json.load(file)
-
-        if package_name in data:
-            data[updated_package['name']] = updated_package['detail']
-            if package_name != updated_package['name']:
-                del data[package_name]  # Hapus entri lama jika nama diperbarui
-
-            with open(DATA_FILE, 'w') as file:
-                json.dump(data, file, indent=4)
-
-            return jsonify({"message": "Paket berhasil diperbarui!"}), 200
-        else:
-            return jsonify({"error": "Paket tidak ditemukan!"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# Endpoint untuk menghapus paket
-@app.route('/delete_package/<package_name>', methods=['DELETE'])
-def delete_package(package_name):
-    try:
-        ensure_data_file_exists()
-        with open(DATA_FILE, 'r') as file:
-            data = json.load(file)
-
-        if package_name in data:
-            del data[package_name]
-            with open(DATA_FILE, 'w') as file:
-                json.dump(data, file, indent=4)
-
-            return jsonify({"message": "Paket berhasil dihapus!"}), 200
-        else:
-            return jsonify({"error": "Paket tidak ditemukan!"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-#-------------- Add Saldo--------------------
 # Route untuk form tambah saldo
 @app.route("/add_balance", methods=["GET", "POST"])
 def add_balance():
@@ -550,7 +442,59 @@ def add_balance():
 
     return render_template("add_balance.html", users=users)
 
-#------------- Home Template -----------
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# LIHAT DATA USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+@app.route('/users', methods=['GET'])
+def users():
+    db = get_db()
+    cursor = db.execute("SELECT username, balance FROM users")
+    users = cursor.fetchall()
+    return render_template('users.html', users=users)
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# KURANGI SALDO USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+@app.route('/kurangi_saldo', methods=['GET', 'POST'])
+def kurangi_saldo():
+    message = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        amount_str = request.form.get('amount')
+
+        # Validasi input jumlah
+        try:
+            amount = int(amount_str)
+            if amount <= 0:
+                message = "Jumlah harus lebih dari nol."
+        except (ValueError, TypeError):
+            message = "Jumlah tidak valid. Masukkan angka yang benar."
+
+        if not message:
+            db = get_db()
+            # Ambil saldo pengguna berdasarkan username
+            cursor = db.execute("SELECT balance FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+            if user:
+                current_balance = user['balance']
+                if current_balance < amount:
+                    message = "Saldo tidak cukup untuk dikurangi."
+                else:
+                    new_balance = current_balance - amount
+                    db.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
+                    db.commit()
+                    message = f"Saldo pengguna {username} berhasil dikurangi sebanyak {amount}."
+            else:
+                message = "Pengguna tidak ditemukan."
+
+    return render_template('kurangi_saldo.html', message=message)
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# STATUS SERVER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
 #Fungsi untuk memeriksa status VPS (ping)
 def check_vps_status(hostname):
     try:
@@ -596,9 +540,9 @@ def get_current_users(hostname, username, password):
         return None  # Jika gagal, kembalikan None
 
 # Route untuk halaman utama
-@app.route("/home")
+@app.route("/status_server")
 def home():
-    return render_template("home.html")
+    return render_template("status_server.html")
 
 # Route untuk mendapatkan status VPS dan informasi lainnya
 @app.route("/status", methods=["GET"])
@@ -623,7 +567,9 @@ def get_status():
     
     return jsonify(vps_list)
 
-#--------------- Fungsi Deposit -----------
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# REQUEST DEPOSIT. NOTIF KE BOT ADMIN TELE
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 # Konfigurasi bot Telegram
 TELEGRAM_BOT_TOKEN = '7360190308:AAH79nXyUiU4TRscBtYRLg14WVNfi1q1T1M'
@@ -660,7 +606,10 @@ def confirm():
         flash('Harap unggah bukti transfer.', 'danger')
         return redirect(url_for('deposit'))
 
-#------------------- Fungsi Delete Account -------------
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# DELETE ACCOUNT 
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
 FILE_PATH_DELETE = "/usr/local/etc/xray/config/04_inbounds.json"
 
 TAG_MAPPING = {
@@ -776,49 +725,9 @@ def delete(protocol, server, username):
         return jsonify({"status": "error", "message": f"Gagal menghapus user '{username}' pada {protocol.upper()} di server {server}."}), 500
 
 
-#------------------ Get Data User di database dan kurangi saldo --------
-
-@app.route('/users', methods=['GET'])
-def users():
-    db = get_db()
-    cursor = db.execute("SELECT username, balance FROM users")
-    users = cursor.fetchall()
-    return render_template('users.html', users=users)
-
-@app.route('/kurangi_saldo', methods=['GET', 'POST'])
-def kurangi_saldo():
-    message = None
-    if request.method == 'POST':
-        username = request.form.get('username')
-        amount_str = request.form.get('amount')
-
-        # Validasi input jumlah
-        try:
-            amount = int(amount_str)
-            if amount <= 0:
-                message = "Jumlah harus lebih dari nol."
-        except (ValueError, TypeError):
-            message = "Jumlah tidak valid. Masukkan angka yang benar."
-
-        if not message:
-            db = get_db()
-            # Ambil saldo pengguna berdasarkan username
-            cursor = db.execute("SELECT balance FROM users WHERE username = ?", (username,))
-            user = cursor.fetchone()
-            if user:
-                current_balance = user['balance']
-                if current_balance < amount:
-                    message = "Saldo tidak cukup untuk dikurangi."
-                else:
-                    new_balance = current_balance - amount
-                    db.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
-                    db.commit()
-                    message = f"Saldo pengguna {username} berhasil dikurangi sebanyak {amount}."
-            else:
-                message = "Pengguna tidak ditemukan."
-
-    return render_template('kurangi_saldo.html', message=message)
-    
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# KELUAR SESI ATAU LOGOUT
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 @app.route("/logout")
 def logout():
