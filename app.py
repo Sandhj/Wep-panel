@@ -318,8 +318,9 @@ def riwayat():
 # TAMBAH DAN HAPUS SERVER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-# Lokasi file server.json
-SERVER_FILE = "/root/project/server.json"
+# Lokasi file server.json (di folder yang sama dengan script)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_FILE = os.path.join(CURRENT_DIR, "server.json")
 
 def load_servers():
     """Load servers from the JSON file."""
