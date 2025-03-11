@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
+  <title>Dashboard</title>
   <!-- Import Google Font: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Import Font Awesome -->
@@ -18,7 +18,7 @@
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background: #fff;
+      background: #f4f4f9;
       overflow-x: hidden;
     }
     /* Top Bar */
@@ -30,30 +30,30 @@
       height: 60px;
       display: flex;
       align-items: center;
-      padding: 20px 20px;
-      color: #000;
+      padding: 0 20px;
+      color: #fff;
       z-index: 1000;
       background: #fff;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
     }
     .toggle {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      padding: 8px 10px;
+      font-size: 1rem;
       color: #000;
       cursor: pointer;
       margin-right: 20px;
       outline: none;
+      opacity: 0.70;
     }
-    .top-bar .title {
-      font-size: 1.2rem;
-      flex: 1;
-    }
+    
     .top-bar .balance-info {
       margin-left: 15px;
       display: flex;
       align-items: center;
+      font-weight: 500;
+      color: #000;
+      opacity: 0.70;
     }
     .top-bar .balance-info i {
       margin-right: 5px;
@@ -70,8 +70,10 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease-out;
       z-index: 1100;
+      background: #f4f4f9;
+      display: flex;
       overflow-y: auto;
-      background: #fff;
+      flex-direction: column;
     }
     .sidebar.show {
       transform: translateX(0);
@@ -83,27 +85,55 @@
       padding-bottom: 10px;
       border-bottom: 1px solid #ddd;
       text-align: center;
-      color: #000;
+      color: #333;
     }
     .sidebar-header i {
       margin-right: 8px;
+      color: #000;
     }
     .sidebar a {
-      display: block;
+      display: flex;
+      align-items: center;
       padding: 12px 10px;
       margin: 5px 0;
-      color: #000;
+      color: #333;
       text-decoration: none;
-      border-radius: 4px;
-      transition: background 0.2s ease;
+      border-radius: 8px;
+      transition: all 0.3s ease;
     }
     .sidebar a:hover {
       background: #f0f0f0;
+      transform: translateX(5px);
+    }
+    .sidebar a i {
+      margin-right: 10px;
+      color: #000;
     }
     .sidebar hr {
       border: none;
       border-top: 1px solid #ddd;
       margin: 10px 0;
+    }
+    /* Submenu */
+    .submenu {
+      display: none;
+      margin-left: 20px;
+      border-left: 2px solid #000;
+      padding-left: 10px;
+    }
+    .submenu a {
+      padding: 8px 10px;
+      margin: 3px 0;
+      font-size: 0.9rem;
+    }
+    .submenu a i {
+      font-size: 0.8rem;
+    }
+    /* Container untuk Menu Logout */
+    .sidebar-footer {
+      margin-top: auto; /* Posisikan di bagian bawah */
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
     }
     /* Overlay */
     .overlay {
@@ -125,11 +155,15 @@
     /* Main Content */
     .content {
       padding: 0;
+      margin-top: 60px;
     }
     iframe {
       width: 100%;
       height: calc(100vh - 60px);
       border: none;
+      background: #f6f5f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -137,7 +171,6 @@
   <!-- Top Bar -->
   <div class="top-bar">
     <button class="toggle" id="toggleButton"><i class="fas fa-bars"></i></button>
-    <div class="title">𝗔𝗱𝗺𝗶𝗻 𝗣𝗮𝗻𝗲𝗹</div>
     <div class="balance-info"><i class="fas fa-wallet"></i> Rp{{ balance }}</div>
   </div>
   
@@ -145,25 +178,78 @@
   <div class="sidebar" id="sidebarMenu">
     <!-- Header dengan Username -->
     <div class="sidebar-header">
-      <i class="fas fa-crown" style="color: #ffd700;"></i> {{ username }}
+      <i class="fas fa-user"></i> {{ username }}
     </div>
+
     <a href="/"><i class="fas fa-home"></i> Home</a>
-    <a href="/create_temp" target="content-frame"><i class="fas fa-shield-alt"></i> VPN Premium</a>
-    <a href="/riwayat" target="content-frame"><i class="fas fa-globe"></i> Akun Saya</a>
-    <a href="/list_xl" target="content-frame"><i class="fas fa-bullseye"></i> Tembak XL</a>
+
+    <a href="#" id="vpnPremium"><i class="fas fa-shield-alt"></i> VPN Premium</a>
+    <!-- Submenu untuk VPN Premium -->
+    <div class="submenu" id="vpnSubmenu">
+      <a href="/create_temp_ssh" target="content-frame"><i class="fas fa-circle"></i> SSH</a>
+      <a href="/create_temp/vmess" target="content-frame"><i class="fas fa-circle"></i> VMESS</a>
+      <a href="/create_temp_vless" target="content-frame"><i class="fas fa-circle"></i> VLESS</a>
+      <a href="/create_temp_trojan" target="content-frame"><i class="fas fa-circle"></i> TROJAN</a>
+    </div>  
+
+    <a href="#" id="managementAkun"><i class="fas fa-clock"></i> Management Akun</a>
+    <!-- Submenu untuk Management Akun -->
+    <div class="submenu" id="managementSubmenu">
+      
+      <a href="/riwayat" target="content-frame"><i class="fas fa-circle"></i> RIWAYAT</a>
+    </div>
+
+    <a href="/status_server" target="content-frame"><i class="fas fa-server"></i> Status Server</a>
     <a href="/deposit" target="content-frame"><i class="fas fa-wallet"></i> Deposit</a>
+    
+    <!-- Admin Control -->
     <hr>
-    <a href="/add_server_temp" target="content-frame"><i class="fas fa-plus"></i> Add Server</a>
-    <a href="/delete_server" target="content-frame"><i class="fas fa-trash"></i> Delete Server</a>
-    <a href="/delete_account" target="content-frame"><i class="fas fa-trash"></i> Delete User VPN</a>
+    <div class="sidebar-header">
+      <i class="fas fa-cog"></i> Admin Control
+    </div>
+    
+    <!-- Management User -->
+    <a href="#" id="managementUser"><i class="fas fa-users"></i> Management User</a>
+    <div class="submenu" id="userManagementSubmenu">
+      <a href="/tambah_saldo" target="content-frame"><i class="fas fa-circle"></i> Tambah Saldo</a>
+      <a href="/kurangi_saldo" target="content-frame"><i class="fas fa-circle"></i> Kurangi Saldo</a>
+      <a href="/list_user" target="content-frame"><i class="fas fa-circle"></i> List</a>
+    </div>
+    
+    <!-- Management VPN -->
+    <a href="#" id="managementVpn"><i class="fas fa-network-wired"></i> Management VPN</a>
+    <div class="submenu" id="vpnManagementSubmenu">
+      <a href="/delete_akun" target="content-frame"><i class="fas fa-circle"></i> Delete Akun</a>
+    </div>
+    
+    <!-- Management Server -->
+    <a href="#" id="managementServer"><i class="fas fa-server"></i> Management Server</a>
+    <div class="submenu" id="serverManagementSubmenu">
+      <a href="/add_server" target="content-frame"><i class="fas fa-circle"></i> Add Server</a>
+      <a href="/delete_server" target="content-frame"><i class="fas fa-circle"></i> Delete Server</a>
+    </div>
+    
+    <!-- Droplet Management -->
+    <a href="#" id="dropletManagement"><i class="fas fa-cloud"></i> Droplet Management</a>
+    <div class="submenu" id="dropletManagementSubmenu">
+      <a href="/buat_droplet" target="content-frame"><i class="fas fa-circle"></i> Buat Droplet</a>
+      <a href="/hapus_droplet" target="content-frame"><i class="fas fa-circle"></i> Hapus Droplet</a>
+     </div>
+    
+    <!-- DNS Management -->
+    <a href="#" id="dnsManagement"><i class="fas fa-globe"></i> DNS Management</a>
+    <div class="submenu" id="dnsManagementSubmenu">
+      <a href="/daftar_ip_dns" target="content-frame"><i class="fas fa-circle"></i> Daftar IP ke DNS</a>
+      <a href="/list_dns" target="content-frame"><i class="fas fa-circle"></i> List DNS</a>
+      <a href="/edit_ip_dns" target="content-frame"><i class="fas fa-circle"></i> Edit IP DNS</a>
+      <a href="/hapus_dns" target="content-frame"><i class="fas fa-circle"></i> Hapus DNS</a>
+    </div>
+    
     <hr>
-    <a href="/users" target="content-frame"><i class="fas fa-id-card"></i> List Member</a>
-    <a href="/kurangi_saldo" target="content-frame"><i class="fas fa-minus-circle"></i> Delete Saldo User</a>
-    <a href="/add_balance" target="content-frame"><i class="fas fa-plus"></i> Add Balance</a>
-    <hr>
-    <a href="/add_list_xl" target="content-frame"><i class="fas fa-plus"></i> Add List XL</a>
-    <hr>
-    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    <!-- Container untuk Menu Logout -->
+    <div class="sidebar-footer">
+      <a href="/logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </div>
   </div>
   
   <!-- Overlay untuk Sidebar -->
@@ -178,6 +264,8 @@
     const sidebar = document.getElementById('sidebarMenu');
     const toggleButton = document.getElementById('toggleButton');
     const overlay = document.getElementById('overlay');
+    const vpnPremium = document.getElementById('vpnPremium');
+    const vpnSubmenu = document.getElementById('vpnSubmenu');
 
     // Tampilkan atau sembunyikan sidebar dan overlay saat tombol toggle diklik
     toggleButton.addEventListener('click', function(e) {
@@ -198,6 +286,66 @@
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
       }
+    });
+
+    // Toggle submenu VPN Premium
+    vpnPremium.addEventListener('click', function(e) {
+      e.preventDefault();
+      vpnSubmenu.style.display = vpnSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    const managementAkun = document.getElementById('managementAkun');
+    const managementSubmenu = document.getElementById('managementSubmenu');
+
+    // Toggle submenu Management Akun
+    managementAkun.addEventListener('click', function(e) {
+      e.preventDefault();
+      managementSubmenu.style.display = managementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Toggle submenu Management User
+    const managementUser = document.getElementById('managementUser');
+    const userManagementSubmenu = document.getElementById('userManagementSubmenu');
+
+    managementUser.addEventListener('click', function(e) {
+      e.preventDefault();
+      userManagementSubmenu.style.display = userManagementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Toggle submenu Management VPN
+    const managementVpn = document.getElementById('managementVpn');
+    const vpnManagementSubmenu = document.getElementById('vpnManagementSubmenu');
+
+    managementVpn.addEventListener('click', function(e) {
+      e.preventDefault();
+      vpnManagementSubmenu.style.display = vpnManagementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Toggle submenu Management Server
+    const managementServer = document.getElementById('managementServer');
+    const serverManagementSubmenu = document.getElementById('serverManagementSubmenu');
+
+    managementServer.addEventListener('click', function(e) {
+      e.preventDefault();
+      serverManagementSubmenu.style.display = serverManagementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Toggle submenu Droplet Management
+    const dropletManagement = document.getElementById('dropletManagement');
+    const dropletManagementSubmenu = document.getElementById('dropletManagementSubmenu');
+
+    dropletManagement.addEventListener('click', function(e) {
+      e.preventDefault();
+      dropletManagementSubmenu.style.display = dropletManagementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Toggle submenu DNS Management
+    const dnsManagement = document.getElementById('dnsManagement');
+    const dnsManagementSubmenu = document.getElementById('dnsManagementSubmenu');
+
+    dnsManagement.addEventListener('click', function(e) {
+      e.preventDefault();
+      dnsManagementSubmenu.style.display = dnsManagementSubmenu.style.display === 'block' ? 'none' : 'block';
     });
   </script>
 </body>
