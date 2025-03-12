@@ -252,6 +252,15 @@
       e.preventDefault();
       vpnSubmenu.style.display = vpnSubmenu.style.display === 'block' ? 'none' : 'block';
     });
+    const managementAkun = document.getElementById('managementAkun');
+    const managementSubmenu = document.getElementById('managementSubmenu');
+
+    // Toggle submenu Management Akun
+    managementAkun.addEventListener('click', function(e) {
+      e.preventDefault();
+      managementSubmenu.style.display = managementSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+
   
   </script>
 </body>
