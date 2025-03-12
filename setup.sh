@@ -6,10 +6,10 @@ wget -q ${LINK}app.py
 
 cd templates
 #Home
-wget -q ${LINK}login.html
-wget -q ${LINK}register.html
-wget -q ${LINK}dash_admin.html
-wget -q ${LINK}dash_guest.html
+wget -q ${LINK}Home/login.html
+wget -q ${LINK}Home/register.html
+wget -q ${LINK}Home/dash_admin.html
+wget -q ${LINK}Home/dash_guest.html
 
 #Server
 wget -q ${LINK}add_server.html
