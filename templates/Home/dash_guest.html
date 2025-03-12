@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>dashboard</title>
+  <title>Dashboard</title>
   <!-- Import Google Font: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Import Font Awesome -->
@@ -18,7 +18,7 @@
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background: #fff;
+      background: #f4f4f9;
       overflow-x: hidden;
     }
     /* Top Bar */
@@ -30,30 +30,31 @@
       height: 60px;
       display: flex;
       align-items: center;
-      padding: 20px 20px;
-      color: #000;
+      padding: 0 20px;
+      color: #fff;
       z-index: 1000;
       background: #fff;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
     }
     .toggle {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      padding: 8px 10px;
+      font-size: 1rem;
       color: #000;
       cursor: pointer;
       margin-right: 20px;
       outline: none;
+      opacity: 0.70;
     }
-    .top-bar .title {
-      font-size: 1.2rem;
-      flex: 1;
-    }
+    
     .top-bar .balance-info {
+      font-size: 14px;
       margin-left: 15px;
       display: flex;
       align-items: center;
+      font-weight: 300;
+      color: #000;
+      opacity: 0.70;
     }
     .top-bar .balance-info i {
       margin-right: 5px;
@@ -70,40 +71,72 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease-out;
       z-index: 1100;
+      background: #f4f4f9;
+      display: flex;
       overflow-y: auto;
-      background: #fff;
+      flex-direction: column;
     }
     .sidebar.show {
       transform: translateX(0);
     }
     /* Sidebar Header untuk Username */
     .sidebar-header {
-      font-size: 1.2rem;
+      font-size: 14px;
       margin-bottom: 20px;
       padding-bottom: 10px;
       border-bottom: 1px solid #ddd;
       text-align: center;
-      color: #000;
+      color: #333;
     }
     .sidebar-header i {
+      font-size: 14px;
       margin-right: 8px;
+      color: #000;
     }
     .sidebar a {
-      display: block;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
       padding: 12px 10px;
       margin: 5px 0;
-      color: #000;
+      color: #333;
       text-decoration: none;
-      border-radius: 4px;
-      transition: background 0.2s ease;
+      border-radius: 8px;
+      transition: all 0.3s ease;
     }
     .sidebar a:hover {
       background: #f0f0f0;
+      transform: translateX(5px);
+    }
+    .sidebar a i {
+      margin-right: 10px;
+      color: #000;
     }
     .sidebar hr {
       border: none;
       border-top: 1px solid #ddd;
       margin: 10px 0;
+    }
+    /* Submenu */
+    .submenu {
+      display: none;
+      margin-left: 20px;
+      border-left: 2px solid #000;
+      padding-left: 10px;
+    }
+    .submenu a {
+      padding: 8px 10px;
+      margin: 3px 0;
+      font-size: 12px;
+    }
+    .submenu a i {
+      font-size: 12px;
+    }
+    /* Container untuk Menu Logout */
+    .sidebar-footer {
+      margin-top: auto; /* Posisikan di bagian bawah */
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
     }
     /* Overlay */
     .overlay {
@@ -125,11 +158,15 @@
     /* Main Content */
     .content {
       padding: 0;
+      margin-top: 60px;
     }
     iframe {
       width: 100%;
       height: calc(100vh - 60px);
       border: none;
+      background: #f6f5f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -137,7 +174,6 @@
   <!-- Top Bar -->
   <div class="top-bar">
     <button class="toggle" id="toggleButton"><i class="fas fa-bars"></i></button>
-    <div class="title">𝗠𝗲𝗺𝗯𝗲𝗿 𝗣𝗮𝗻𝗲𝗹</div>
     <div class="balance-info"><i class="fas fa-wallet"></i> Rp{{ balance }}</div>
   </div>
   
@@ -147,13 +183,32 @@
     <div class="sidebar-header">
       <i class="fas fa-user"></i> {{ username }}
     </div>
+
     <a href="/"><i class="fas fa-home"></i> Home</a>
-    <a href="/create_temp" target="content-frame"><i class="fas fa-shield-alt"></i> VPN Premium</a>
-    <a href="/riwayat" target="content-frame"><i class="fas fa-globe"></i> Akun Saya</a>
-    <a href="/list_xl" target="content-frame"><i class="fas fa-bullseye"></i> Tembak XL</a>
+
+    <a href="#" id="vpnPremium"><i class="fas fa-shield-alt"></i> VPN Premium</a>
+    <!-- Submenu untuk VPN Premium -->
+    <div class="submenu" id="vpnSubmenu">
+      <a href="/create_temp_ssh" target="content-frame"><i class="fas fa-circle"></i> SSH</a>
+      <a href="/create_temp_vmess" target="content-frame"><i class="fas fa-circle"></i> VMESS</a>
+      <a href="/create_temp_vless" target="content-frame"><i class="fas fa-circle"></i> VLESS</a>
+      <a href="/create_temp_trojan" target="content-frame"><i class="fas fa-circle"></i> TROJAN</a>
+    </div>  
+
+    <a href="#" id="managementAkun"><i class="fas fa-clock"></i> Management Akun</a>
+    <!-- Submenu untuk Management Akun -->
+    <div class="submenu" id="managementSubmenu">
+      <a href="/riwayat_akun" target="content-frame"><i class="fas fa-circle"></i> RIWAYAT</a>
+    </div>
+
+    <a href="/status_server" target="content-frame"><i class="fas fa-server"></i> Status Server</a>
     <a href="/deposit" target="content-frame"><i class="fas fa-wallet"></i> Deposit</a>
+    
     <hr>
-    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    <!-- Container untuk Menu Logout -->
+    <div class="sidebar-footer">
+      <a href="/logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </div>
   </div>
   
   <!-- Overlay untuk Sidebar -->
@@ -168,6 +223,8 @@
     const sidebar = document.getElementById('sidebarMenu');
     const toggleButton = document.getElementById('toggleButton');
     const overlay = document.getElementById('overlay');
+    const vpnPremium = document.getElementById('vpnPremium');
+    const vpnSubmenu = document.getElementById('vpnSubmenu');
 
     // Tampilkan atau sembunyikan sidebar dan overlay saat tombol toggle diklik
     toggleButton.addEventListener('click', function(e) {
@@ -189,6 +246,13 @@
         overlay.classList.remove('show');
       }
     });
+
+    // Toggle submenu VPN Premium
+    vpnPremium.addEventListener('click', function(e) {
+      e.preventDefault();
+      vpnSubmenu.style.display = vpnSubmenu.style.display === 'block' ? 'none' : 'block';
+    });
+  
   </script>
 </body>
 </html>
