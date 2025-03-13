@@ -124,6 +124,105 @@ def admin_dashboard():
     return render_template("dash_admin.html", username=username, balance=balance)
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# TAMBAH SALDO USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+# Route untuk form tambah saldo
+@app.route("/add_balance", methods=["GET", "POST"])
+def add_balance():
+    db = get_db()
+    cursor = db.cursor()
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        balance_to_add = request.form.get("balance")
+
+        if not username or not balance_to_add:
+            flash("Username dan jumlah saldo harus diisi.", "error")
+            return redirect("/add_balance")
+
+        try:
+            balance_to_add = int(balance_to_add)
+            if balance_to_add <= 0:
+                flash("Jumlah saldo harus lebih dari 0.", "error")
+                return redirect("/add_balance")
+        except ValueError:
+            flash("Jumlah saldo harus berupa angka.", "error")
+            return redirect("/add_balance")
+
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+
+        if user:
+            new_balance = user["balance"] + balance_to_add
+            cursor.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
+            db.commit()
+            flash(f"Saldo berhasil ditambahkan untuk {username}. Saldo baru: {new_balance}", "success")
+        else:
+            flash(f"Pengguna dengan username '{username}' tidak ditemukan.", "error")
+
+        return redirect("/add_balance")
+
+    # Untuk method GET, query semua username dari tabel users
+    cursor.execute("SELECT username FROM users")
+    # Jika cursor.fetchall() mengembalikan list of tuples, Anda bisa melakukan:
+    users = [dict(row) for row in cursor.fetchall()]
+    # Atau jika sudah dikonfigurasi agar mengembalikan dict, cukup:
+    # users = cursor.fetchall()
+
+    return render_template("add_balance.html", users=users)
+
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# LIHAT DATA USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+@app.route('/users', methods=['GET'])
+def users():
+    db = get_db()
+    cursor = db.execute("SELECT username, balance FROM users")
+    users = cursor.fetchall()
+    return render_template('users.html', users=users)
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# KURANGI SALDO USER
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+@app.route('/kurangi_saldo', methods=['GET', 'POST'])
+def kurangi_saldo():
+    message = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        amount_str = request.form.get('amount')
+
+        # Validasi input jumlah
+        try:
+            amount = int(amount_str)
+            if amount <= 0:
+                message = "Jumlah harus lebih dari nol."
+        except (ValueError, TypeError):
+            message = "Jumlah tidak valid. Masukkan angka yang benar."
+
+        if not message:
+            db = get_db()
+            # Ambil saldo pengguna berdasarkan username
+            cursor = db.execute("SELECT balance FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+            if user:
+                current_balance = user['balance']
+                if current_balance < amount:
+                    message = "Saldo tidak cukup untuk dikurangi."
+                else:
+                    new_balance = current_balance - amount
+                    db.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
+                    db.commit()
+                    message = f"Saldo pengguna {username} berhasil dikurangi sebanyak {amount}."
+            else:
+                message = "Pengguna tidak ditemukan."
+
+    return render_template('kurangi_saldo.html', message=message)
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # PAGE CREATE AKUN VPN PREMIUM 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
@@ -394,103 +493,6 @@ def delete_server():
         
         return redirect(url_for('delete_server'))
 
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-# TAMBAH SALDO USER
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-
-# Route untuk form tambah saldo
-@app.route("/add_balance", methods=["GET", "POST"])
-def add_balance():
-    db = get_db()
-    cursor = db.cursor()
-
-    if request.method == "POST":
-        username = request.form.get("username")
-        balance_to_add = request.form.get("balance")
-
-        if not username or not balance_to_add:
-            flash("Username dan jumlah saldo harus diisi.", "error")
-            return redirect("/add_balance")
-
-        try:
-            balance_to_add = int(balance_to_add)
-            if balance_to_add <= 0:
-                flash("Jumlah saldo harus lebih dari 0.", "error")
-                return redirect("/add_balance")
-        except ValueError:
-            flash("Jumlah saldo harus berupa angka.", "error")
-            return redirect("/add_balance")
-
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = cursor.fetchone()
-
-        if user:
-            new_balance = user["balance"] + balance_to_add
-            cursor.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
-            db.commit()
-            flash(f"Saldo berhasil ditambahkan untuk {username}. Saldo baru: {new_balance}", "success")
-        else:
-            flash(f"Pengguna dengan username '{username}' tidak ditemukan.", "error")
-
-        return redirect("/add_balance")
-
-    # Untuk method GET, query semua username dari tabel users
-    cursor.execute("SELECT username FROM users")
-    # Jika cursor.fetchall() mengembalikan list of tuples, Anda bisa melakukan:
-    users = [dict(row) for row in cursor.fetchall()]
-    # Atau jika sudah dikonfigurasi agar mengembalikan dict, cukup:
-    # users = cursor.fetchall()
-
-    return render_template("add_balance.html", users=users)
-
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-# LIHAT DATA USER
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-
-@app.route('/users', methods=['GET'])
-def users():
-    db = get_db()
-    cursor = db.execute("SELECT username, balance FROM users")
-    users = cursor.fetchall()
-    return render_template('users.html', users=users)
-
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-# KURANGI SALDO USER
-# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-
-@app.route('/kurangi_saldo', methods=['GET', 'POST'])
-def kurangi_saldo():
-    message = None
-    if request.method == 'POST':
-        username = request.form.get('username')
-        amount_str = request.form.get('amount')
-
-        # Validasi input jumlah
-        try:
-            amount = int(amount_str)
-            if amount <= 0:
-                message = "Jumlah harus lebih dari nol."
-        except (ValueError, TypeError):
-            message = "Jumlah tidak valid. Masukkan angka yang benar."
-
-        if not message:
-            db = get_db()
-            # Ambil saldo pengguna berdasarkan username
-            cursor = db.execute("SELECT balance FROM users WHERE username = ?", (username,))
-            user = cursor.fetchone()
-            if user:
-                current_balance = user['balance']
-                if current_balance < amount:
-                    message = "Saldo tidak cukup untuk dikurangi."
-                else:
-                    new_balance = current_balance - amount
-                    db.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
-                    db.commit()
-                    message = f"Saldo pengguna {username} berhasil dikurangi sebanyak {amount}."
-            else:
-                message = "Pengguna tidak ditemukan."
-
-    return render_template('kurangi_saldo.html', message=message)
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # STATUS SERVER
