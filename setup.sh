@@ -12,20 +12,20 @@ wget -q ${LINK}/templates/Home/dash_admin.html
 wget -q ${LINK}/templates/Home/dash_guest.html
 
 #Server
-wget -q ${LINK}templates/Home/add_server.html
-wget -q ${LINK}templates/Home/delete_server.html
-wget -q ${LINK}templates/Home/status_server.html
+wget -q ${LINK}templates/server/add_server.html
+wget -q ${LINK}templates/server/delete_server.html
+wget -q ${LINK}templates/server/status_server.html
 
 #Users
-wget -q ${LINK}templates/Home/add_balance.html
-wget -q ${LINK}templates/Home/kurangi_saldo.html
-wget -q ${LINK}templates/Home/users.html
+wget -q ${LINK}templates/user/add_balance.html
+wget -q ${LINK}templates/user/kurangi_saldo.html
+wget -q ${LINK}templates/user/users.html
 
 #Vpn
-wget -q ${LINK}templates/Home/create_ssh.html
-wget -q ${LINK}templates/Home/create_vmess.html
-wget -q ${LINK}templates/Home/create_vless.html
-wget -q ${LINK}templates/Home/create_trojan.html
-wget -q ${LINK}templates/Home/delete_account.html
-wget -q ${LINK}templates/Home/result.html
-wget -q ${LINK}templates/Home/riwayat.html
+wget -q ${LINK}templates/Vpn/create_ssh.html
+wget -q ${LINK}templates/Vpn/create_vmess.html
+wget -q ${LINK}templates/Vpn/create_vless.html
+wget -q ${LINK}templates/Vpn/create_trojan.html
+wget -q ${LINK}templates/Vpn/delete_account.html
+wget -q ${LINK}templates/Vpn/result.html
+wget -q ${LINK}templates/Vpn/riwayat.html
