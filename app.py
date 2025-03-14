@@ -128,7 +128,7 @@ def admin_dashboard():
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 # Route untuk form tambah saldo
-@app.route("/add_balance", methods=["GET", "POST"])
+@app.route("/tambah_saldo_user", methods=["GET", "POST"])
 def add_balance():
     db = get_db()
     cursor = db.cursor()
@@ -139,16 +139,16 @@ def add_balance():
 
         if not username or not balance_to_add:
             flash("Username dan jumlah saldo harus diisi.", "error")
-            return redirect("/add_balance")
+            return redirect("/tambah_saldo_user")
 
         try:
             balance_to_add = int(balance_to_add)
             if balance_to_add <= 0:
                 flash("Jumlah saldo harus lebih dari 0.", "error")
-                return redirect("/add_balance")
+                return redirect("/tambah_saldo_user")
         except ValueError:
             flash("Jumlah saldo harus berupa angka.", "error")
-            return redirect("/add_balance")
+            return redirect("/tambah_saldo_user")
 
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
@@ -161,7 +161,7 @@ def add_balance():
         else:
             flash(f"Pengguna dengan username '{username}' tidak ditemukan.", "error")
 
-        return redirect("/add_balance")
+        return redirect("/tambah_saldo_user")
 
     # Untuk method GET, query semua username dari tabel users
     cursor.execute("SELECT username FROM users")
@@ -170,25 +170,25 @@ def add_balance():
     # Atau jika sudah dikonfigurasi agar mengembalikan dict, cukup:
     # users = cursor.fetchall()
 
-    return render_template("add_balance.html", users=users)
+    return render_template("tambah_saldo_user.html", users=users)
 
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # LIHAT DATA USER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-@app.route('/users', methods=['GET'])
+@app.route('/list_user', methods=['GET'])
 def users():
     db = get_db()
     cursor = db.execute("SELECT username, balance FROM users")
     users = cursor.fetchall()
-    return render_template('users.html', users=users)
+    return render_template('list_user.html', users=users)
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # KURANGI SALDO USER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-@app.route('/kurangi_saldo', methods=['GET', 'POST'])
+@app.route('/kurangi_saldo_user', methods=['GET', 'POST'])
 def kurangi_saldo():
     message = None
     if request.method == 'POST':
@@ -220,7 +220,7 @@ def kurangi_saldo():
             else:
                 message = "Pengguna tidak ditemukan."
 
-    return render_template('kurangi_saldo.html', message=message)
+    return render_template('kurangi_saldo_user.html', message=message)
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # PAGE CREATE AKUN VPN PREMIUM 
