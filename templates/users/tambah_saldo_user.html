@@ -1,345 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Balance</title>
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  />
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f4f4f4;
-      margin-top: 75px;
-      padding: 0;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 20px;
-      color: #333;
-      font-size: 28px;
-    }
-
-    /* Toast Notifications */
-    .toast-container {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      z-index: 1000;
-    }
-    .toast {
-      display: flex;
-      align-items: center;
-      background-color: #333;
-      color: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-      margin-bottom: 10px;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    .toast.success {
-      background-color: #28a745;
-    }
-    .toast.error {
-      background-color: #dc3545;
-    }
-    .toast i {
-      margin-right: 10px;
-    }
-
-    /* Form Styling */
-    form {
-      width: 320px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 8px;
-      display: block;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-    button[type="submit"] {
-      width: 100%;
-      padding: 12px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      transition: background-color 0.3s ease;
-    }
-    button[type="submit"]:hover {
-      background-color: #2980b9;
-    }
-    a {
-      display: block;
-      text-align: center;
-      margin-top: 15px;
-      text-decoration: none;
-      color: #3498db;
-      font-size: 14px;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .form-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .form-header i {
-      font-size: 36px;
-      color: #3498db;
-      margin-bottom: 10px;
-    }
-    .preset-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .preset-buttons .preset {
-      flex: 1;
-      padding: 10px;
-      background-color: #e0e0e0;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: background-color 0.3s ease;
-    }
-    .preset-buttons .preset:hover {
-      background-color: #ccc;
-    }
-    /* Custom Dropdown Styles */
-    .custom-dropdown {
-      position: relative;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    .custom-dropdown input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-    .dropdown-list {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      max-height: 200px;
-      overflow-y: auto;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-top: none;
-      z-index: 100;
-      display: none;
-    }
-    .dropdown-list.active {
-      display: block;
-    }
-    .dropdown-item {
-      padding: 10px;
-      cursor: pointer;
-    }
-    .dropdown-item:hover {
-      background-color: #f4f4f4;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Load Google Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Tambah Saldo user</title>
+    <style>
+        * {
+            font-family: Poppins, sans-serif;
+        }
+        body {
+            font-family: Poppins, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .custom-select {
+            position: relative;
+            width: 100%;
+            margin-bottom: 16px;
+            
+        }
+        .custom-select-button {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            text-align: left;
+            color: #333;
+        }
+        .custom-select-button:hover {
+            background-color: #f0f0f0;
+        }
+        .custom-select-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: #fff;
+            z-index: 10;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .custom-select-dropdown.show {
+            display: block;
+        }
+        .custom-select-option {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .custom-select-option:hover {
+            background-color: #f0f0f0;
+        }
+        input[type="number"] {
+            width: 95%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .shortcut-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .shortcut-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+        .shortcut-button:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-top: 20px;
+        }
+        .message-success {
+            color: green;
+            font-weight: bold;
+            text-align: center;
+        }
+        .message-error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <h1>
-    <i class="fas fa-wallet"></i> Add Balance
-  </h1>
+    <h1>Tambah Saldo User</h1> 
+    <form method="POST" action="{{ url_for('add_balance') }}">
+        <label>Pilih Pengguna:</label>
+        <div class="custom-select">
+            <button type="button" class="custom-select-button" id="usernameButton">-- Pilih Pengguna --</button>
+            <input type="hidden" id="selectedUsername" name="username" required>
+            <div class="custom-select-dropdown" id="usernameDropdown">
+                {% for user in users %}
+                    <div class="custom-select-option" data-username="{{ user.username }}">{{ user.username }}</div>
+                {% endfor %}
+            </div>
+        </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="toast-container"></div>
+        <label for="balance">Jumlah Saldo yang Ditambahkan:</label>
+        <input type="number" id="balance" name="balance" min="1" required>
 
-  <!-- Flash Messages (Flask) -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul style="display: none;">
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+        <!-- Tombol pintas untuk saldo -->
+        <div class="shortcut-buttons">
+            <button type="button" class="shortcut-button" onclick="setBalance(5000)">5.000</button>
+            <button type="button" class="shortcut-button" onclick="setBalance(10000)">10.000</button>
+            <button type="button" class="shortcut-button" onclick="setBalance(20000)">20.000</button>
+            <button type="button" class="shortcut-button" onclick="setBalance(25000)">25.000</button>
+            <button type="button" class="shortcut-button" onclick="setBalance(50000)">50.000</button>
+            <button type="button" class="shortcut-button" onclick="setBalance(100000)">100.000</button>
+        </div>
 
-  <!-- Form to Add Balance -->
-  <form method="POST">
-    <div class="form-header">
-      <p>Add funds to a user's account</p>
-    </div>
+        <button type="submit">Tambah Saldo</button>
 
-    <!-- Custom Dropdown untuk Username -->
-    <label for="dropdownInput">Select Username:</label>
-    <div class="custom-dropdown" id="customDropdown">
-      <!-- Input tampilan untuk pencarian -->
-      <input
-        type="text"
-        placeholder="Pilih username"
-        id="dropdownInput"
-        autocomplete="off"
-      />
-      <!-- Daftar username yang akan difilter -->
-      <div class="dropdown-list" id="dropdownList">
-        {% for user in users %}
-          <div class="dropdown-item" data-value="{{ user.username }}">
-            {{ user.username }}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <!-- Input tersembunyi untuk menyimpan nilai username yang dipilih -->
-    <input type="hidden" name="username" id="username" required />
-
-    <!-- Input Balance dengan format dan preset -->
-    <label for="balance">Balance to Add:</label>
-    <input type="text" name="balance" id="balance" placeholder="Enter amount" required inputmode="numeric">
-
-
-    <!-- Preset Buttons untuk nominal -->
-    <div class="preset-buttons">
-      <button type="button" class="preset" data-value="5000">5,000</button>
-      <button type="button" class="preset" data-value="10000">10,000</button>
-      <button type="button" class="preset" data-value="15000">15,000</button>
-      <button type="button" class="preset" data-value="25000">25,000</button>
-      <button type="button" class="preset" data-value="50000">50,000</button>
-      <button type="button" class="preset" data-value="100000">100,000</button>
-    </div>
-
-    <button type="submit">
-      <i class="fas fa-plus-circle"></i> Add Balance
-    </button>
-  </form>
-
-  <script>
-    // Fungsi untuk menampilkan toast notifications
-    function showToast(message, type) {
-      const toastContainer = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.classList.add("toast", "show", type);
-      toast.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
-      toastContainer.appendChild(toast);
-      // Hapus toast setelah 4 detik
-      setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => {
-          toast.remove();
-        }, 500);
-      }, 4000);
-    }
-
-    // Tampilkan flash message Flask sebagai Toast saat halaman dimuat
-    window.onload = function() {
-      {% with messages = get_flashed_messages(with_categories=true) %}
+    <!-- Menampilkan pesan flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          {% for category, message in messages %}
-            showToast("{{ message }}", "{{ category }}");
-          {% endfor %}
+            <div class="messages">
+                {% for category, message in messages %}
+                    <div class="message-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
         {% endif %}
-      {% endwith %}
-    };
+    {% endwith %}
+    </form>
 
-    // Custom Dropdown untuk Username
-    document.addEventListener("DOMContentLoaded", function () {
-      const dropdownInput = document.getElementById("dropdownInput");
-      const dropdownList = document.getElementById("dropdownList");
-      const dropdownItems = dropdownList.getElementsByClassName("dropdown-item");
-      const hiddenUsername = document.getElementById("username");
-
-      // Toggle tampilan dropdown saat input diklik
-      dropdownInput.addEventListener("click", function (e) {
-        dropdownList.classList.toggle("active");
-      });
-
-      // Filter opsi berdasarkan input
-      dropdownInput.addEventListener("input", function (e) {
-        const filter = this.value.toLowerCase();
-        Array.from(dropdownItems).forEach((item) => {
-          if (item.textContent.toLowerCase().includes(filter)) {
-            item.style.display = "block";
-          } else {
-            item.style.display = "none";
-          }
-        });
-        dropdownList.classList.add("active");
-      });
-
-      // Ketika salah satu opsi diklik, isi input tampilan dan input tersembunyi
-      Array.from(dropdownItems).forEach((item) => {
-        item.addEventListener("click", function (e) {
-          dropdownInput.value = this.textContent;
-          hiddenUsername.value = this.getAttribute("data-value");
-          dropdownList.classList.remove("active");
-        });
-      });
-
-      // Menutup dropdown jika klik di luar area dropdown
-      document.addEventListener("click", function (e) {
-        const customDropdown = document.getElementById("customDropdown");
-        if (!customDropdown.contains(e.target)) {
-          dropdownList.classList.remove("active");
+    <!-- JavaScript untuk mengatur nilai saldo dan custom select -->
+    <script>
+        // Fungsi untuk mengatur nilai saldo
+        function setBalance(amount) {
+            document.getElementById("balance").value = amount;
         }
-      });
-    });
 
-    // Format input balance: menambahkan koma sebagai pemisah ribuan
-    document.getElementById("balance").addEventListener("input", function (e) {
-      let value = this.value.replace(/,/g, "").replace(/\D/g, "");
-      if (value) {
-        this.value = Number(value).toLocaleString("en-US");
-      } else {
-        this.value = "";
-      }
-    });
+        // Fungsi untuk menangani custom select
+        const usernameButton = document.getElementById("usernameButton");
+        const usernameDropdown = document.getElementById("usernameDropdown");
+        const selectedUsername = document.getElementById("selectedUsername");
 
-    // Event listener untuk tombol preset balance
-    document.querySelectorAll(".preset").forEach((button) => {
-      button.addEventListener("click", function () {
-        const presetValue = this.getAttribute("data-value");
-        document.getElementById("balance").value = Number(presetValue).toLocaleString("en-US");
-      });
-    });
+        // Toggle dropdown visibility
+        usernameButton.addEventListener("click", () => {
+            usernameDropdown.classList.toggle("show");
+        });
 
-    // Sebelum form disubmit, hapus koma agar nilai yang dikirim murni angka
-    document.querySelector("form").addEventListener("submit", function (e) {
-      const balanceInput = document.getElementById("balance");
-      balanceInput.value = balanceInput.value.replace(/,/g, "");
-    });
-  </script>
+        // Handle option selection
+        document.querySelectorAll(".custom-select-option").forEach(option => {
+            option.addEventListener("click", () => {
+                const username = option.getAttribute("data-username");
+                usernameButton.textContent = username;
+                selectedUsername.value = username;
+                usernameDropdown.classList.remove("show");
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest(".custom-select")) {
+                usernameDropdown.classList.remove("show");
+            }
+        });
+    </script>
 </body>
 </html>
