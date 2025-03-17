@@ -11,65 +11,40 @@
     
     <style>
         * {
-          font-family: 'Poppins', sans-serif;
-          
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px; /* Ukuran font lebih kecil */
+        }
         body {
-            padding 20px;
-            background-color: #fff;
+            background-color: #f9f9f9;
             color: #333;
+            padding: 20px;
             text-align: center;
         }
         h1, h2 {
             color: #444;
-            margin: 20px;
+            margin: 20px 0;
+            font-size: 18px; /* Ukuran judul lebih kecil */
         }
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: auto;
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1000;
-        }
-        .toast {
-            display: flex;
-            align-items: center;
-            background-color: #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .toast.success { background-color: #28a745; }
-        .toast.error { background-color: #dc3545; }
-        .toast i {
-            margin-right: 10px;
         }
 
         /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px 0;
             background-color: #fff;
-            border-radius: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         table th, table td {
-            padding: 14px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
@@ -85,19 +60,21 @@
         form {
             background-color: #fff;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 400px;
             margin: auto;
             text-align: left;
         }
         form label {
             font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
         }
         form input[type="text"] {
-            width: 50%;
+            width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
@@ -108,22 +85,34 @@
             padding: 12px;
             cursor: pointer;
             width: 100%;
-            font-size: 16px;
+            font-size: 14px; /* Ukuran tombol lebih kecil */
             border-radius: 5px;
             transition: background 0.3s;
         }
         form button:hover {
             background-color: #0056b3;
         }
+
+        /* Minimalist Toast Notifications */
+        .toast-message {
+            margin-top: 10px;
+            font-size: 12px; /* Ukuran toast lebih kecil */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .toast-message.show {
+            opacity: 1;
+        }
+        .toast-message.success {
+            color: #28a745;
+        }
+        .toast-message.error {
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-server"></i> Daftar Server</h1>
-
-        <!-- Toast Notification Container -->
-        <div id="toast-container" class="toast-container"></div>
-
         <!-- Tabel Daftar Server -->
         <table>
             <thead>
@@ -151,24 +140,22 @@
             <label for="name">Nama Server yang akan dihapus:</label>
             <input type="text" id="name" name="name" placeholder="Masukkan nama server" required>
             <button type="submit"><i class="fas fa-trash-alt"></i> Hapus Server</button>
+            
+            <!-- Minimalist Toast Message -->
+            <div id="toast-message" class="toast-message"></div>
         </form>
     </div>
 
     <script>
         // Fungsi untuk menampilkan toast
         function showToast(message, type) {
-            const toastContainer = document.getElementById("toast-container");
-            const toast = document.createElement("div");
-            toast.classList.add("toast", "show", type);
-            toast.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
-            toastContainer.appendChild(toast);
+            const toastMessage = document.getElementById("toast-message");
+            toastMessage.textContent = message;
+            toastMessage.className = `toast-message ${type} show`;
 
-            // Hapus toast setelah 4 detik
+            // Sembunyikan toast setelah 4 detik
             setTimeout(() => {
-                toast.classList.remove("show");
-                setTimeout(() => {
-                    toast.remove();
-                }, 500);
+                toastMessage.classList.remove("show");
             }, 4000);
         }
 
