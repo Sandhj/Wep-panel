@@ -186,14 +186,7 @@
 
     <a href="/"><i class="fas fa-home"></i> Home</a>
 
-    <a href="#" id="vpnPremium"><i class="fas fa-shield-alt"></i> VPN Premium</a>
-    <!-- Submenu untuk VPN Premium -->
-    <div class="submenu" id="vpnSubmenu">
-      <a href="/create_temp_ssh" target="content-frame"><i class="fas fa-circle"></i> SSH</a>
-      <a href="/create_temp_vmess" target="content-frame"><i class="fas fa-circle"></i> VMESS</a>
-      <a href="/create_temp_vless" target="content-frame"><i class="fas fa-circle"></i> VLESS</a>
-      <a href="/create_temp_trojan" target="content-frame"><i class="fas fa-circle"></i> TROJAN</a>
-    </div>  
+    <a href="/create" target="content-frame"><i class="fas fa-shield-alt"></i> Buat VPN Premium</a>
 
     <a href="#" id="managementAkun"><i class="fas fa-clock"></i> Management Akun</a>
     <!-- Submenu untuk Management Akun -->
@@ -247,21 +240,11 @@
       }
     });
 
-    // Toggle submenu VPN Premium
-    vpnPremium.addEventListener('click', function(e) {
-      e.preventDefault();
-      vpnSubmenu.style.display = vpnSubmenu.style.display === 'block' ? 'none' : 'block';
-    });
-    const managementAkun = document.getElementById('managementAkun');
-    const managementSubmenu = document.getElementById('managementSubmenu');
-
     // Toggle submenu Management Akun
     managementAkun.addEventListener('click', function(e) {
       e.preventDefault();
       managementSubmenu.style.display = managementSubmenu.style.display === 'block' ? 'none' : 'block';
     });
-
-  
   </script>
 </body>
 </html>
