@@ -10,6 +10,7 @@ wget -q ${LINK}/templates/Home/login.html
 wget -q ${LINK}/templates/Home/register.html
 wget -q ${LINK}/templates/Home/dash_admin.html
 wget -q ${LINK}/templates/Home/dash_guest.html
+wget -q ${LINK}/templates/Home/home.html
 
 #Server
 wget -q ${LINK}templates/server/add_server.html
