@@ -1,4 +1,5 @@
-echo -e "masukan Bot Tele :"
+echo -e "Silahkan Masukkan Data Web anda :
+echo -e "══════════════════════⊹⊱≼≽⊰⊹══"
 read -p "Identitas :" identity
 read -p "Domain :" domain
 read -p "Port :" port
