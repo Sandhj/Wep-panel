@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Layanan</title>
+    <!-- Load Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Load Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #6c5ce7;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .balance {
+            background-color: #6c5ce7;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .services {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .service-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: calc(33.33% - 40px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            text-align: center;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        .service-card i {
+            font-size: 48px;
+            color: #6c5ce7;
+            margin-bottom: 15px;
+        }
+        .service-card h3 {
+            color: #6c5ce7;
+            margin-bottom: 10px;
+        }
+        .service-card p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .highlight {
+            color: #6c5ce7;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .service-card {
+                width: calc(50% - 20px);
+            }
+        }
+        @media (max-width: 480px) {
+            .service-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Greeting Section -->
+        <div class="greeting">
+            <h1><i class="fa-solid fa-user"></i> Halo, <span class="highlight">{{ username }}</span>!</h1>
+            <p>Selamat Datang</p>
+            <p>Beberapa list layanan VPN kami di bawah ini yang dapat anda gunakan untuk kebutuhan internet anda</p>
+        </div>
+
+        <!-- Balance Section -->
+        <div class="balance">
+            <i class="fa-solid fa-wallet"></i> Saldo Anda: Rp {{ balance }}
+        </div>
+
+        <!-- Services Section -->
+
+        <div class="services">
+            <div class="service-card">
+                <i class="fa-solid fa-globe"></i>
+                <h3>VPN SSH WEBSOCKET</h3>
+                <p>Layanan VPN dengan protokol SSH dan WebSocket untuk akses cepat dan stabil.</p>
+            </div>
+            <div class="service-card">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h3>XRAY VMESS</h3>
+                <p>Layanan XRay dengan protokol VMESS untuk privasi dan keamanan maksimal.</p>
+            </div>
+            <div class="service-card">
+                <i class="fa-solid fa-bolt"></i>
+                <h3>XRAY VLESS</h3>
+                <p>Layanan XRay dengan protokol VLESS untuk performa tinggi dan efisiensi.</p>
+            </div>
+            <div class="service-card">
+                <i class="fa-solid fa-lock"></i>
+                <h3>XRAY TROJAN</h3>
+                <p>Layanan XRay dengan protokol Trojan untuk kecepatan dan keamanan terbaik.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
