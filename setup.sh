@@ -265,6 +265,23 @@ else:
     print("Proses restore gagal.")
 EOL
 
+# SETUP NGINX
+#install Nginx
+sudo apt update
+sudo apt install nginx -y
+sudo apt update
+
+cd /etc/nginx/sites-available/
+wget -q https://raw.githubusercontent.com/Sandhj/project/main/web.easyvpn.biz.id
+
+sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+#pasang SSL
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d $domain
+
 #Kembali Ke Root dan Hapus File Setup
 cd
 rm -r setup.sh
