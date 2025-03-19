@@ -22,8 +22,7 @@ wget -q ${LINK}templates/users/kurangi_saldo_user.html
 wget -q ${LINK}templates/users/list_user.html
 
 #Vpn
-wget -q ${LINK}templates/Vpn/create_vpn.html
-wget -q ${LINK}templates/Vpn/delete_account.html
+wget -q ${LINK}templates/Vpn/create.html
 wget -q ${LINK}templates/Vpn/result.html
 wget -q ${LINK}templates/Vpn/riwayat.html
 
