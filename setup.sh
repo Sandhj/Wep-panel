@@ -29,3 +29,6 @@ wget -q ${LINK}templates/Vpn/riwayat.html
 #Deposit
 wget -q ${LINK}templates/deposit/deposit_form.html
 wget -q ${LINK}templates/deposit/payment_confirmation.html
+
+cd
+rm setup.sh
