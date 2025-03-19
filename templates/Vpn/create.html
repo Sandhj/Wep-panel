@@ -16,12 +16,13 @@
     input, select, textarea, button, .custom-dropdown {
       -webkit-appearance: none;
       outline: none;
+      font-family: 'Poppins', sans-serif;
     }
     /* Global Styles */
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f7f7f7;
-      margin-top: 75px;
+      background-color: #fff;
+      margin: 0;
       padding: 0;
     }
     .container {
@@ -61,7 +62,7 @@
     }
     input[type="submit"] {
       width: 100%;
-      background-color: #007bff;
+      background-color: #6a11cb;
       border: none;
       padding: 12px;
       color: #fff;
@@ -149,7 +150,6 @@
 </head>
 <body>
   <div class="container">
-    <h2><i class="fas fa-tasks"></i> VIP MANAGEMENT</h2>
     <form action="/create" method="POST">
       <!-- VPS Custom Dropdown -->
       <div class="form-group">
@@ -205,6 +205,7 @@
     // Data opsi untuk masing-masing field
     const dropdownOptions = {
       protocol: [
+        { value: 'ssh', label: 'SSH' },
         { value: 'vmess', label: 'VMESS' },
         { value: 'vless', label: 'VLESS' },
         { value: 'trojan', label: 'TROJAN' }
