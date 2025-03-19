@@ -1,5 +1,7 @@
 echo -e "masukan Bot Tele :"
 read -p "Identitas :" identity
+read -p "Domain :" domain
+read -p "Port :" port
 read -p "Token Tele :" tele
 read -p "Id Tele :" idtele
 
@@ -273,7 +275,20 @@ sudo apt update
 
 cd /etc/nginx/sites-available/
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/web.easyvpn.biz.id
+cat <<EOL >
+server {
+    listen 80;
+    server_name $domain;
 
+    location / {
+        proxy_pass http://$domain:$port;  # Pastikan ini adalah alamat Flask Anda
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOL
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
