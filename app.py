@@ -237,7 +237,7 @@ def get_current_users_vpn(hostname, username, password):
         ssh.connect(hostname, username=username, password=password)
 
         # Jalankan script user.sh dan ambil outputnya
-        stdin, stdout, stderr = ssh.exec_command("/root/user.sh")
+        stdin, stdout, stderr = ssh.exec_command("user.sh")
         output = stdout.read().decode().strip()  # Ambil hasil output
         
         ssh.close()
@@ -284,7 +284,7 @@ def run_script_on_vps(vps, protocol, username, expired):
         ssh.connect(vps['hostname'], username=vps['username'], password=vps['password'])
 
         # Jalankan skrip di VPS
-        command = f"/usr/bin/create_{protocol}"
+        command = f"create_{protocol}"
         stdin, stdout, stderr = ssh.exec_command(command)
         stdin.write(f"{username}\n{expired}\n")
         stdin.flush()
@@ -531,7 +531,7 @@ def get_current_users(hostname, username, password):
         ssh.connect(hostname, username=username, password=password)
 
         # Jalankan script user.sh dan ambil outputnya
-        stdin, stdout, stderr = ssh.exec_command("/root/user.sh")
+        stdin, stdout, stderr = ssh.exec_command("user.sh")
         output = stdout.read().decode().strip()  # Ambil hasil output
         
         ssh.close()
