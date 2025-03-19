@@ -6,7 +6,7 @@
   <title>Registrasi Akun</title>
   <!-- Menggunakan Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     /* Reset CSS */
     * {
@@ -18,7 +18,7 @@
     
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom, #ffffff, #a7d1eb); 
+      background: linear-gradient(to bottom, #6a11cb, #2575fc); /* Gradient Ungu */
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -38,12 +38,7 @@
     
     .user-icon {
       font-size: 40px;
-    }
-    
-    .user-icon svg {
-      width: 64px;
-      height: 64px;
-      fill: #4facfe;
+      color: #6a11cb; /* Ungu untuk ikon */
     }
     
     h2 {
@@ -69,11 +64,11 @@
     
     input[type="text"]:focus,
     input[type="password"]:focus {
-      border-color: #4facfe;
+      border-color: #6a11cb; /* Ungu untuk focus border */
     }
     
     button[type="submit"] {
-      background: #4facfe;
+      background: #6a11cb; /* Ungu untuk tombol */
       color: #fff;
       border: none;
       padding: 12px;
@@ -85,14 +80,14 @@
     }
     
     button[type="submit"]:hover {
-      background: #00f2fe;
+      background: #4e0d9b; /* Ungu lebih gelap untuk hover */
     }
     
     a {
       display: block;
       margin-top: 15px;
       text-decoration: none;
-      color: #4facfe;
+      color: #6a11cb; /* Ungu untuk link */
       font-weight: 500;
     }
     
@@ -105,7 +100,7 @@
       position: fixed;
       top: 20px;
       right: 20px;
-      background: #4facfe;
+      background: #6a11cb; /* Ungu untuk toast */
       color: #fff;
       padding: 15px 20px;
       border-radius: 8px;
@@ -122,11 +117,11 @@
     
     /* Kategori flash message */
     .toast.error {
-      background: #ff4d4d;
+      background: #ff4d4d; /* Merah untuk error */
     }
     
     .toast.success {
-      background: #28a745;
+      background: #28a745; /* Hijau untuk success */
     }
   </style>
 </head>
