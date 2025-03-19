@@ -5,49 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Load Google Font Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <title>Tambah Saldo user</title>
+    <title>Tambah Saldo User</title>
     <style>
         * {
             font-family: Poppins, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             font-family: Poppins, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #fff;
+            background-color: #ffffff; /* Background putih */
+            color: #333; /* Warna teks default */
         }
         h1 {
-            color: #333;
+            color: #6a11cb; /* Judul dengan warna ungu */
             text-align: center;
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            color: #666; /* Subtitle abu-abu */
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
         }
         form {
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             max-width: 400px;
             margin: 0 auto;
+            background: #fff;
+            
         }
         label {
             display: block;
             margin-bottom: 8px;
+            font-weight: 500;
+            color: #555; /* Warna teks label */
         }
         .custom-select {
             position: relative;
             width: 100%;
             margin-bottom: 16px;
-            
         }
         .custom-select-button {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: #fff;
             cursor: pointer;
             text-align: left;
             color: #333;
+            transition: border-color 0.3s ease;
         }
         .custom-select-button:hover {
-            background-color: #f0f0f0;
+            background-color: #fff; /* Border ungu saat hover */
         }
         .custom-select-dropdown {
             display: none;
@@ -61,35 +77,44 @@
             z-index: 10;
             max-height: 150px;
             overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         .custom-select-dropdown.show {
             display: block;
         }
         .custom-select-option {
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .custom-select-option:hover {
             background-color: #f0f0f0;
         }
         input[type="number"] {
-            width: 95%;
-            padding: 8px;
+            width: 100%;
+            padding: 10px;
             margin-bottom: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="number"]:focus {
+            border-color: #6a11cb; /* Border ungu saat difokuskan */
         }
         button {
-            background-color: #28a745;
+            background-color: green; /* Tombol dengan warna ungu */
             color: white;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #4e0d9b; /* Ungu lebih gelap saat hover */
         }
         .shortcut-buttons {
             display: flex;
@@ -98,7 +123,7 @@
             margin-bottom: 20px;
         }
         .shortcut-button {
-            background-color: #007bff;
+            background-color: #6a11cb; /* Shortcut button dengan warna ungu */
             color: white;
             padding: 8px 12px;
             border: none;
@@ -106,65 +131,83 @@
             cursor: pointer;
             font-size: 14px;
             flex: 1;
+            transition: background-color 0.3s ease;
         }
         .shortcut-button:hover {
-            background-color: #0056b3;
+            background-color: #4e0d9b; /* Ungu lebih gelap saat hover */
+        }
+        hr.divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
         }
         .messages {
             margin-top: 20px;
-        }
-        .message-success {
-            color: green;
-            font-weight: bold;
             text-align: center;
         }
-        .message-error {
-            color: red;
+        .message-success {
+            color: #28a745; /* Hijau untuk pesan sukses */
             font-weight: bold;
+        }
+        .message-error {
+            color: #dc3545; /* Merah untuk pesan error */
+            font-weight: bold;
+        }
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
             text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>Tambah Saldo User</h1> 
-    <form method="POST" action="{{ url_for('add_balance') }}">
-        <label>Pilih Pengguna:</label>
-        <div class="custom-select">
-            <button type="button" class="custom-select-button" id="usernameButton">-- Pilih Pengguna --</button>
-            <input type="hidden" id="selectedUsername" name="username" required>
-            <div class="custom-select-dropdown" id="usernameDropdown">
-                {% for user in users %}
-                    <div class="custom-select-option" data-username="{{ user.username }}">{{ user.username }}</div>
-                {% endfor %}
+    <div style="text-align: center; width: 100%; max-width: 450px;">
+        <form method="POST" action="{{ url_for('add_balance') }}">
+            <label>Pilih Pengguna:</label>
+            <div class="custom-select">
+                <button type="button" class="custom-select-button" id="usernameButton">-- Pilih Pengguna --</button>
+                <input type="hidden" id="selectedUsername" name="username" required>
+                <div class="custom-select-dropdown" id="usernameDropdown">
+                    {% for user in users %}
+                        <div class="custom-select-option" data-username="{{ user.username }}">{{ user.username }}</div>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
 
-        <label for="balance">Jumlah Saldo yang Ditambahkan:</label>
-        <input type="number" id="balance" name="balance" min="1" required>
+            <label for="balance">Jumlah Saldo yang Ditambahkan:</label>
+            <input type="number" id="balance" name="balance" min="1" placeholder="Masukkan jumlah saldo" required>
 
-        <!-- Tombol pintas untuk saldo -->
-        <div class="shortcut-buttons">
-            <button type="button" class="shortcut-button" onclick="setBalance(5000)">5.000</button>
-            <button type="button" class="shortcut-button" onclick="setBalance(10000)">10.000</button>
-            <button type="button" class="shortcut-button" onclick="setBalance(20000)">20.000</button>
-            <button type="button" class="shortcut-button" onclick="setBalance(25000)">25.000</button>
-            <button type="button" class="shortcut-button" onclick="setBalance(50000)">50.000</button>
-            <button type="button" class="shortcut-button" onclick="setBalance(100000)">100.000</button>
-        </div>
-
-        <button type="submit">Tambah Saldo</button>
-
-    <!-- Menampilkan pesan flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="messages">
-                {% for category, message in messages %}
-                    <div class="message-{{ category }}">{{ message }}</div>
-                {% endfor %}
+            <!-- Tombol pintas untuk saldo -->
+            <div class="shortcut-buttons">
+                <button type="button" class="shortcut-button" onclick="setBalance(5000)">5.000</button>
+                <button type="button" class="shortcut-button" onclick="setBalance(10000)">10.000</button>
+                <button type="button" class="shortcut-button" onclick="setBalance(20000)">20.000</button>
+                <button type="button" class="shortcut-button" onclick="setBalance(25000)">25.000</button>
+                <button type="button" class="shortcut-button" onclick="setBalance(50000)">50.000</button>
+                <button type="button" class="shortcut-button" onclick="setBalance(100000)">100.000</button>
             </div>
-        {% endif %}
-    {% endwith %}
-    </form>
+
+            <button type="submit"><i class="fas fa-plus-circle"></i> Tambah Saldo</button>
+
+            <!-- Menampilkan pesan flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="messages">
+                        {% for category, message in messages %}
+                            <div class="message-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </form>
+
+        <hr class="divider">
+
+        <div class="footer-note">
+            Pastikan data yang dimasukkan benar sebelum mengirimkan formulir.
+        </div>
+    </div>
 
     <!-- JavaScript untuk mengatur nilai saldo dan custom select -->
     <script>
