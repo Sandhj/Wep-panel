@@ -11,34 +11,40 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #f7f7f7;
+      background-color: #ffffff; /* Background putih */
       font-size: 0.9rem;
       font-family: 'Poppins', sans-serif;
+      color: #333; /* Warna teks default */
     }
     /* Styling untuk judul */
     .custom-heading {
-      background: #fff;
-      box-shadow: 3px 3px 6px #d1d1d1, -3px -3px 6px #ffffff;
-      color: #000;
+      background: #f7f7f7; /* Background abu-abu muda */
+      border-left: 5px solid #6a11cb; /* Border kiri ungu */
+      color: #333;
       padding: 10px;
       border-radius: 5px;
       text-align: center;
       margin-bottom: 15px;
       font-size: 1.1rem;
     }
-    /* Styling card dengan gradasi lembut dan efek emboss */
+    /* Styling card */
     .card {
-      border: none;
+      border: 1px solid #ddd; /* Border abu-abu tipis */
       border-radius: 8px;
-      background: linear-gradient(145deg, #ffffff, #f7f7f7);
-      box-shadow: 3px 3px 6px #d1d1d1, -3px -3px 6px #ffffff;
+      background: #fff; /* Background putih */
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* Shadow ringan */
       margin-bottom: 15px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(106, 17, 203, 0.1); /* Shadow lembut dengan aksen ungu */
     }
     .card-header {
       font-weight: bold;
       font-size: 1rem;
-      background: #fff;
-      color: #000;
+      background: #6a11cb; /* Header ungu */
+      color: #fff; /* Teks putih */
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
       padding: 8px 12px;
@@ -47,15 +53,41 @@
       padding: 8px 12px;
     }
     .status-on {
-      color: #28a745;
+      color: #4CAF50; /* Hijau untuk status ON */
     }
     .status-off {
-      color: #dc3545;
+      color: #FF5252; /* Merah untuk status OFF */
+    }
+    .highlight-purple {
+      color: #6a11cb; /* Warna ungu untuk highlight */
+      font-weight: 600;
     }
     .spinner-container {
       display: flex;
       justify-content: center;
-      margin: 10px 0;
+      margin: 20px 0;
+    }
+    .spinner-border {
+      width: 2.5rem;
+      height: 2.5rem;
+      animation: spin 1s linear infinite;
+      border-color: #6a11cb transparent transparent transparent; /* Spinner dengan warna ungu */
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    /* Media Query untuk Layar Kecil */
+    @media (max-width: 480px) {
+      .custom-heading {
+        font-size: 1rem;
+      }
+      .card-header {
+        font-size: 0.9rem;
+      }
+      .card-body {
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -64,7 +96,7 @@
     <h5 class="custom-heading">STATUS SERVER</h5>
     <!-- Loader dengan spinner Bootstrap kecil -->
     <div id="loader" class="spinner-container">
-      <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+      <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
@@ -111,18 +143,24 @@
             </div>
             <div class="card-body">
               <p class="mb-1 ${vps.status === 'ON' ? 'status-on' : 'status-off'}">
-                ${statusIcon} ${vps.status}
+                ${statusIcon} Status: <span class="highlight-purple">${vps.status}</span>
               </p>
               <p class="mb-1">
-                ${latencyIcon} Latency: ${vps.latency || '-'}
+                ${latencyIcon} Latency: <span class="highlight-purple">${vps.latency || '-'}</span>
               </p>
               <p class="mb-0">
-                <i class="fa-solid fa-users"></i> User: ${vps.current_users}/${vps.max_user}
+                <i class="fa-solid fa-users"></i> User: <span class="highlight-purple">${vps.current_users}/${vps.max_user}</span>
               </p>
             </div>
           `;
           col.appendChild(card);
           container.appendChild(col);
+
+          // Animasi fade-in untuk card
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 100);
         });
       } catch (error) {
         console.error('Error fetching status:', error);
