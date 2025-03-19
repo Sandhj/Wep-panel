@@ -131,7 +131,7 @@ def guest_dashboard():
     db = get_db()
     user = db.execute("SELECT balance FROM users WHERE username = ?", (username,)).fetchone()
     balance = user["balance"] if user else 0
-    return render_template("dash_guest.html", username=username, balance=balance)
+    return render_template("home.html", username=username, balance=balance)
 
 
 
