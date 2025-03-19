@@ -124,7 +124,7 @@ def admin_dashboard():
     return render_template("dash_admin.html", username=username, balance=balance)
 
 @app.route("/home")
-def guest_dashboard():
+def home():
     if "username" not in session or session["username"] == "mastersandi":
         return redirect("/login")
     username = session["username"]
