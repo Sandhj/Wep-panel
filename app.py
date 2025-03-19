@@ -556,7 +556,7 @@ def get_current_users(hostname, username, password):
 
 # Route untuk halaman utama
 @app.route("/status_server")
-def home():
+def status_server():
     return render_template("status_server.html")
 
 # Route untuk mendapatkan status VPS dan informasi lainnya
