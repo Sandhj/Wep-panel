@@ -123,7 +123,7 @@ def admin_dashboard():
     balance = user["balance"] if user else 0
     return render_template("dash_admin.html", username=username, balance=balance)
 
-@app.route("/home")
+@app.route("/home", methods=['GET'])
 def home():
     if "username" not in session or session["username"] == "mastersandi":
         return redirect("/login")
