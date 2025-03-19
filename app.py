@@ -123,6 +123,18 @@ def admin_dashboard():
     balance = user["balance"] if user else 0
     return render_template("dash_admin.html", username=username, balance=balance)
 
+@app.route("/home")
+def guest_dashboard():
+    if "username" not in session or session["username"] == "mastersandi":
+        return redirect("/login")
+    username = session["username"]
+    db = get_db()
+    user = db.execute("SELECT balance FROM users WHERE username = ?", (username,)).fetchone()
+    balance = user["balance"] if user else 0
+    return render_template("dash_guest.html", username=username, balance=balance)
+
+
+
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # TAMBAH SALDO USER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
