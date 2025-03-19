@@ -395,7 +395,7 @@ def create_account():
 # RIWAYAT DAN DETAIL AKUN USER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-@app.route('/riwayat', methods=['GET'])
+@app.route('/riwayat_akun', methods=['GET'])
 def riwayat():
     # Cek apakah pengguna sudah login
     if 'username' not in session:
