@@ -1,4 +1,4 @@
-echo -e "Silahkan Masukkan Data Web anda :
+echo -e "Silahkan Masukkan Data Web anda :"
 echo -e "══════════════════════⊹⊱≼≽⊰⊹══"
 read -p "Identitas :" identity
 read -p "Domain :" domain
@@ -15,7 +15,7 @@ LINK="https://raw.githubusercontent.com/Sandhj/Wep-panel/main/"
 
 mkdir -p /root/$identity/templates
 mkdir -p /root/project/backup
-mkdir -p/root/project/static
+mkdir -p /root/project/static
 
 cd web
 wget -q ${LINK}app.py
