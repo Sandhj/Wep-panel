@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restore Backup</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ffffff; /* Background putih */
+            color: #333;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #6a11cb; /* Judul dengan warna ungu */
+            margin-bottom: 1rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        form {
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:focus {
+            border-color: #6a11cb; /* Border ungu saat difokuskan */
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.3); /* Glow ungu */
+        }
+
+        button {
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #6a11cb; /* Tombol dengan warna ungu */
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4e0d9b; /* Ungu lebih gelap saat hover */
+        }
+
+        .footer-note {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+        }
+
+        /* Styling untuk pesan sukses atau gagal */
+        .message {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .message.success {
+            background-color: #d4edda; /* Latar belakang hijau muda */
+            color: #155724; /* Teks hijau tua */
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da; /* Latar belakang merah muda */
+            color: #721c24; /* Teks merah tua */
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload File Backup untuk Restore</h1>
+        <p class="subtitle">Unggah file backup (.zip) untuk memulihkan data.</p>
+
+        <form action="/restore" method="post" enctype="multipart/form-data">
+            <label for="file">Pilih file backup (.zip):</label>
+            <input type="file" id="file" name="file" accept=".zip" required>
+
+            <button type="submit">Restore</button>
+
+            <!-- Menampilkan pesan sukses atau gagal -->
+            {% if message %}
+            <div class="message {{ status }}">
+                {{ message }}
+            </div>
+            {% endif %}
+        </form>
+
+        <div class="footer-note">
+            Pastikan file backup valid sebelum melakukan restore.
+        </div>
+    </div>
+</body>
+</html>
