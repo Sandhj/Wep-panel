@@ -628,38 +628,44 @@ def confirm():
 # RESTORE DATA WEB
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-@app.route('/restore_temp', methods=['GET'])
-def restore_temp():
-    return render_template('restore.html')
-
-@app.route('/restore', methods=['POST'])
+@app.route('/restore', methods=['GET', 'POST'])
 def restore():
-    if 'file' not in request.files:
-        return "No file part", 400
+    message = None
+    status = None
 
-    file = request.files['file']
-    if file.filename == '':
-        return "No selected file", 400
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            message = "No file part"
+            status = "error"
+        else:
+            file = request.files['file']
+            if file.filename == '':
+                message = "No selected file"
+                status = "error"
+            elif file and file.filename.endswith('.zip'):
+                # Simpan file zip sementara
+                zip_path = os.path.join(os.getcwd(), 'temp_restore.zip')
+                file.save(zip_path)
 
-    if file and file.filename.endswith('.zip'):
-        # Simpan file zip sementara
-        zip_path = os.path.join(os.getcwd(), 'temp_restore.zip')
-        file.save(zip_path)
+                try:
+                    # Ekstrak file zip
+                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                        zip_ref.extractall(os.getcwd())
 
-        try:
-            # Ekstrak file zip
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(os.getcwd())
+                    # Hapus file zip sementara
+                    os.remove(zip_path)
 
-            # Hapus file zip sementara
-            os.remove(zip_path)
+                    message = "Restore berhasil!"
+                    status = "success"
+                except Exception as e:
+                    message = f"Error saat ekstraksi: {e}"
+                    status = "error"
+            else:
+                message = "File harus berupa .zip"
+                status = "error"
 
-            return "Restore berhasil! File telah diekstrak dan menggantikan file lama."
-        except Exception as e:
-            return f"Error saat ekstraksi: {e}", 500
-    else:
-        return "File harus berupa .zip", 400
-
+    return render_template('restore.html', message=message, status=status)
+    
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RENEW ACCOUNT 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
