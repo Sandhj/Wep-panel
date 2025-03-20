@@ -628,7 +628,7 @@ def confirm():
 # RESTORE DATA WEB
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-@app.route('/restore_temp')
+@app.route('/restore_temp', methods=['GET'])
 def restore_temp():
     return render_template('restore.html')
 
