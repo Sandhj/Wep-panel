@@ -275,7 +275,7 @@ sudo apt install nginx -y
 sudo apt update
 
 cd /etc/nginx/sites-available/
-wget -q https://raw.githubusercontent.com/Sandhj/project/main/web.easyvpn.biz.id
+
 cat <<EOL >
 server {
     listen 80;
