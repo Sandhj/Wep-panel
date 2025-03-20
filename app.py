@@ -125,8 +125,6 @@ def admin_dashboard():
 
 @app.route("/home", methods=['GET'])
 def home():
-    if "username" not in session or session["username"] == "mastersandi":
-        return redirect("/login")
     username = session["username"]
     db = get_db()
     user = db.execute("SELECT balance FROM users WHERE username = ?", (username,)).fetchone()
