@@ -7,7 +7,7 @@ import json
 import shutil
 import urllib.parse
 import telebot
-
+import zipfile
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -625,8 +625,40 @@ def confirm():
         return redirect(url_for('deposit'))
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-# DELETE ACCOUNT 
+# RESTORE DATA WEB
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+@app.route('/restore_temp')
+def restore_temp():
+    return render_template('restore.html')
+
+@app.route('/restore', methods=['POST'])
+def restore():
+    if 'file' not in request.files:
+        return "No file part", 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return "No selected file", 400
+
+    if file and file.filename.endswith('.zip'):
+        # Simpan file zip sementara
+        zip_path = os.path.join(os.getcwd(), 'temp_restore.zip')
+        file.save(zip_path)
+
+        try:
+            # Ekstrak file zip
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(os.getcwd())
+
+            # Hapus file zip sementara
+            os.remove(zip_path)
+
+            return "Restore berhasil! File telah diekstrak dan menggantikan file lama."
+        except Exception as e:
+            return f"Error saat ekstraksi: {e}", 500
+    else:
+        return "File harus berupa .zip", 400
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RENEW ACCOUNT 
