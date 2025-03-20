@@ -590,10 +590,16 @@ bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 
 @app.route('/deposit', methods=['GET', 'POST'])
 def deposit():
+    # Pastikan session username sudah ada, jika tidak redirect ke halaman login
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Redirect ke halaman login jika session kosong
+
     if request.method == 'POST':
-        username = request.form['username']
+        # Ambil username dari session
+        username = session['username']
         amount = request.form['amount']
         return render_template('payment_confirmation.html', username=username, amount=amount)
+
     return render_template('deposit_form.html')
 
 @app.route('/confirm', methods=['POST'])
