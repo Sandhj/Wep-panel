@@ -7,6 +7,8 @@ read -p "Port :" PORT
 read -p "Token Tele :" tele
 read -p "Id Tele :" idtele
 
+export FLASK_IP=$(curl -s ifconfig.me)
+
 cd
 apt update 
 sudo apt install git
