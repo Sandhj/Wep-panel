@@ -727,6 +727,7 @@ wget -q ${LINK}templates/server/status_server.html
 wget -q ${LINK}templates/users/tambah_saldo_user.html
 wget -q ${LINK}templates/users/kurangi_saldo_user.html
 wget -q ${LINK}templates/users/list_user.html
+wget -q ${LINK}templates/users/restore.html
 
 #Vpn
 wget -q ${LINK}templates/Vpn/create.html
