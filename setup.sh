@@ -260,7 +260,11 @@ def kurangi_saldo():
 # PAGE CREATE AKUN VPN PREMIUM 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-# Fungsi untuk mendapatkan jumlah pengguna (current) melalui SSH
+# Lokasi file server.json (di folder yang sama dengan script)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_FILE = os.path.join(CURRENT_DIR, "server.json")
+
+# Fungsi untuk mendapatkan jumlah pengguna aktif melalui SSH
 def get_current_users_vpn(hostname, username, password):
     try:
         # Setup SSH client
@@ -270,20 +274,40 @@ def get_current_users_vpn(hostname, username, password):
         # Connect to the server
         ssh.connect(hostname, username=username, password=password)
 
-        # Jalankan script user.sh dan ambil outputnya
-        stdin, stdout, stderr = ssh.exec_command("user.sh")
-        output = stdout.read().decode().strip()  # Ambil hasil output
-        
+        # Jalankan perintah untuk membaca file konfigurasi dan menghitung jumlah pengguna
+        config_file = "/etc/xray/config.json"
+        commands = [
+            f"grep -c -E '^#& ' {config_file}",  # Menghitung vlx
+            f"grep -c -E '^### ' {config_file}",  # Menghitung vmc
+            f"grep -c -E '^#! ' {config_file}",  # Menghitung trx
+            f"grep -c -E '^#ss# ' {config_file}",  # Menghitung ssx
+            "awk -F: '$3 >= 1000 && $1 != \"nobody\" {print $1}' /etc/passwd | wc -l"  # Menghitung ssh1
+        ]
+
+        # Eksekusi semua perintah dan ambil hasilnya
+        results = []
+        for cmd in commands:
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read().decode().strip()
+            results.append(int(output) if output.isdigit() else 0)
+
+        # Hitung total pengguna berdasarkan hasil
+        vlx, vmc, trx, ssx, ssh1 = results
+        vla = vlx // 2
+        vma = vmc // 2
+        trb = trx // 2
+        ssa = ssx // 2
+        total = vla + vma + trb + ssh1
+
         ssh.close()
-        
-        # Kembalikan jumlah user yang sedang aktif (current) sebagai integer
-        return int(output)
+        return total
     except Exception as e:
         print(f"Error: {e}")
-        return None  # Jika gagal, kembalikan None
+        return 0  # Jika gagal, kembalikan 0
+
 # Fungsi untuk mendapatkan daftar VPS dari file server.json
 def get_vps_list():
-    with open('server.json', 'r') as f:
+    with open(SERVER_FILE, 'r') as f:
         return json.load(f)
 
 @app.route('/vps-list', methods=['GET'])
@@ -291,48 +315,23 @@ def vps_list():
     # Membaca daftar VPS dari file JSON
     vps_list = get_vps_list()
     
-    # Set max_user
-    max_user = 25
-    
     filtered_vps = []
     
     # Memeriksa jumlah pengguna (current) pada masing-masing VPS
     for vps in vps_list:
         current_users = get_current_users_vpn(vps["hostname"], vps["username"], vps["password"])
         
+        # Ambil max_user dari field "limit" di JSON
+        max_user = vps.get("limit", 25)  # Default ke 25 jika "limit" tidak ada
+        
         # Jika jumlah pengguna belum mencapai max_user, tambahkan ke daftar
-        if current_users is not None and current_users < max_user:
+        if current_users < max_user:
             vps["current_users"] = current_users
             vps["max_user"] = max_user
             filtered_vps.append(vps)
     
     # Mengirimkan daftar VPS yang belum mencapai max_user
     return jsonify(filtered_vps)
-
-# Fungsi untuk menghubungkan ke VPS dan menjalankan skrip
-def run_script_on_vps(vps, protocol, username, expired):
-    try:
-        # Koneksi SSH ke VPS
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Menambahkan host key jika tidak ada
-        ssh.connect(vps['hostname'], username=vps['username'], password=vps['password'])
-
-        # Jalankan skrip di VPS
-        command = f"create_{protocol}"
-        stdin, stdout, stderr = ssh.exec_command(command)
-        stdin.write(f"{username}\n{expired}\n")
-        stdin.flush()
-
-        # Ambil output dari skrip
-        output = stdout.read().decode('utf-8')
-
-        ssh.close()
-        
-        return output
-
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return f"Error: {str(e)}"
 
 @app.route('/create_temp', methods=['GET'])
 def create_account_temp():
@@ -424,6 +423,45 @@ def create_account():
         cost=total_cost,
         balance=new_balance
     )
+
+# Fungsi untuk menghubungkan ke VPS dan menjalankan skrip
+def run_script_on_vps(vps, protocol, username, expired):
+    try:
+        # Koneksi SSH ke VPS
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Menambahkan host key jika tidak ada
+        ssh.connect(vps['hostname'], username=vps['username'], password=vps['password'])
+
+        # Jalankan skrip di VPS
+        command = f"create_{protocol}"
+        stdin, stdout, stderr = ssh.exec_command(command)
+        stdin.write(f"{username}\n{expired}\n")
+        stdin.flush()
+
+        # Ambil output dari skrip
+        output = stdout.read().decode('utf-8')
+
+        ssh.close()
+        
+        return output
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return f"Error: {str(e)}"
+
+# Fungsi untuk mendapatkan koneksi database
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect('database.db')
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+# Fungsi untuk menutup koneksi database saat aplikasi dimatikan
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RIWAYAT DAN DETAIL AKUN USER
