@@ -846,10 +846,15 @@ import os
 import zipfile
 import telebot
 from datetime import datetime
+import schedule
+import time
 
 # Konfigurasi bot Telegram
 BOT_TOKEN = '$tele'
 CHAT_ID = '$idtele'
+
+# Direktori yang akan di-backup
+BACKUP_DIR = '/root/${identity}/'
 
 # Inisialisasi bot Telegram
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -866,10 +871,11 @@ def backup_and_send_to_telegram():
         # Membuat file zip
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for file in files_to_backup:
-                if os.path.exists(file):
-                    zipf.write(file)
+                file_path = os.path.join(BACKUP_DIR, file)  # Gabungkan direktori dengan nama file
+                if os.path.exists(file_path):
+                    zipf.write(file_path, arcname=file)  # Tambahkan file ke ZIP dengan nama relatif
                 else:
-                    print(f"File {file} tidak ditemukan.")
+                    print(f"File {file} tidak ditemukan di {BACKUP_DIR}.")
 
         # Mengirim file zip ke bot Telegram
         with open(zip_filename, 'rb') as zip_file:
@@ -883,47 +889,21 @@ def backup_and_send_to_telegram():
     except Exception as e:
         print(f"Error: {e}")
 
+# Menjadwalkan tugas untuk dijalankan setiap 1 menit
+schedule.every(1).minutes.do(backup_and_send_to_telegram)
+
 if __name__ == "__main__":
-    backup_and_send_to_telegram()
+    print("Jadwal backup dimulai. Backup akan dijalankan setiap 1 menit.")
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 EOL
 
 #Buat Run Backup
 cat <<EOL > /root/$identity/run_backup.sh
-#!/bin/bash
-source /root/$identity/web/bin/activate
-python /root/$identity/backup.py
+
 EOL
 
-#Buat System Service Backup 
-cat <<EOL > /etc/systemd/system/${identity}_backup.service
-[Unit]
-Description=Run Backup Script
-After=network.target
-
-[Service]
-Type=oneshot
-ExecStart=/root/${identity}/run_backup.sh
-User=root
-Group=root
-EOL
-
-#Buat Timer
-cat <<EOL > /etc/systemd/system/${identity}_backup.timer
-[Unit]
-Description=Run Backup Script Every 3 Hours
-
-[Timer]
-OnCalendar=*-*-* 00/3:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOL
-
-#Restar Layanan
-sudo systemctl daemon-reload
-sudo systemctl enable ${identity}_backup.timer
-sudo systemctl start ${identity}_backup.timer
 
 #Pasang Domain Dan SSL
 
