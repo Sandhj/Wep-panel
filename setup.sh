@@ -890,18 +890,39 @@ def backup_and_send_to_telegram():
         print(f"Error: {e}")
 
 # Menjadwalkan tugas untuk dijalankan setiap 1 menit
-schedule.every(1).minutes.do(backup_and_send_to_telegram)
+schedule.every(120).minutes.do(backup_and_send_to_telegram)
 
 if __name__ == "__main__":
-    print("Jadwal backup dimulai. Backup akan dijalankan setiap 1 menit.")
+    print("Jadwal backup dimulai. Backup akan dijalankan setiap 120 menit.")
     while True:
         schedule.run_pending()
         time.sleep(1)
 EOL
 
-#Buat Run Backup
-cat <<EOL > /root/$identity/run_backup.sh
+cat <<EOL > root/$identity/run_b.sh
+#!/bin/bash
+source /root/$identity/web/bin/activate
+python /root/$identity/backup.py
+EOL
 
+#Buat Run Backup
+cat <<EOL > /etc/systemd/system/run_b.service
+[Unit]
+Description=Run Backup Script
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /root/$identity/run_b.sh
+Restart=on-failure
+RestartSec=10
+User=root
+WorkingDirectory=/root/$identity/
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
 EOL
 
 
