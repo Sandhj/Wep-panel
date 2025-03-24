@@ -570,7 +570,11 @@ def delete_server():
 # STATUS SERVER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-#Fungsi untuk memeriksa status VPS (ping)
+# Lokasi file server.json (di folder yang sama dengan script)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_FILE = os.path.join(CURRENT_DIR, "server.json")
+
+# Fungsi untuk memeriksa status VPS (ping)
 def check_vps_status(hostname):
     try:
         # Perintah ping ke setiap VPS
@@ -592,7 +596,7 @@ def check_vps_status(hostname):
     except Exception as e:
         return {"status": "OFF", "latency": "-"}
 
-# Fungsi untuk mendapatkan jumlah pengguna (current) melalui SSH
+# Fungsi untuk mendapatkan jumlah pengguna aktif dari VPS menggunakan SSH
 def get_current_users(hostname, username, password):
     try:
         # Setup SSH client
@@ -602,17 +606,36 @@ def get_current_users(hostname, username, password):
         # Connect to the server
         ssh.connect(hostname, username=username, password=password)
 
-        # Jalankan script user.sh dan ambil outputnya
-        stdin, stdout, stderr = ssh.exec_command("user.sh")
-        output = stdout.read().decode().strip()  # Ambil hasil output
-        
+        # Jalankan perintah untuk membaca file konfigurasi dan menghitung jumlah pengguna
+        config_file = "/etc/xray/config.json"
+        commands = [
+            f"grep -c -E '^#& ' {config_file}",  # Menghitung vlx
+            f"grep -c -E '^### ' {config_file}",  # Menghitung vmc
+            f"grep -c -E '^#! ' {config_file}",  # Menghitung trx
+            f"grep -c -E '^#ss# ' {config_file}",  # Menghitung ssx
+            "awk -F: '$3 >= 1000 && $1 != \"nobody\" {print $1}' /etc/passwd | wc -l"  # Menghitung ssh1
+        ]
+
+        # Eksekusi semua perintah dan ambil hasilnya
+        results = []
+        for cmd in commands:
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read().decode().strip()
+            results.append(int(output) if output.isdigit() else 0)
+
+        # Hitung total pengguna berdasarkan hasil
+        vlx, vmc, trx, ssx, ssh1 = results
+        vla = vlx // 2
+        vma = vmc // 2
+        trb = trx // 2
+        ssa = ssx // 2
+        total = vla + vma + trb + ssh1
+
         ssh.close()
-        
-        # Kembalikan jumlah user yang sedang aktif (current) sebagai integer
-        return int(output)
+        return total
     except Exception as e:
         print(f"Error: {e}")
-        return None  # Jika gagal, kembalikan None
+        return 0  # Jika gagal, kembalikan 0
 
 # Route untuk halaman utama
 @app.route("/status_server")
@@ -623,22 +646,22 @@ def status_server():
 @app.route("/status", methods=["GET"])
 def get_status():
     # Membaca data dari file JSON
-    with open('server.json') as f:
+    with open(SERVER_FILE, "r") as f:
         vps_list = json.load(f)
     
-    # Set max_user
-    max_user = 25
-
     # Memeriksa status masing-masing VPS
     for vps in vps_list:
+        # Periksa status VPS (ping)
         vps_status = check_vps_status(vps["hostname"])
         vps["status"] = vps_status["status"]
         vps["latency"] = vps_status["latency"]
         
+        # Ambil max_user dari field "limit" di JSON
+        vps["max_user"] = vps.get("limit", 25)  # Default ke 25 jika "limit" tidak ada
+        
         # Ambil current user menggunakan paramiko
-        current_users = get_current_users(vps["hostname"], vps["username"], vps["password"])  # Pastikan menambahkan username dan password di server.json
-        vps["current_users"] = current_users if current_users is not None else 0
-        vps["max_user"] = max_user
+        current_users = get_current_users(vps["hostname"], vps["username"], vps["password"])
+        vps["current_users"] = current_users
     
     return jsonify(vps_list)
 
