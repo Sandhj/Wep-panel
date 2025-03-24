@@ -514,7 +514,11 @@ def delete_server():
 # STATUS SERVER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
-#Fungsi untuk memeriksa status VPS (ping)
+# Lokasi file server.json (di folder yang sama dengan script)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_FILE = os.path.join(CURRENT_DIR, "server.json")
+
+# Fungsi untuk memeriksa status VPS (ping)
 def check_vps_status(hostname):
     try:
         # Perintah ping ke setiap VPS
@@ -556,7 +560,7 @@ def get_current_users(hostname, username, password):
         return int(output)
     except Exception as e:
         print(f"Error: {e}")
-        return None  # Jika gagal, kembalikan None
+        return 0  # Jika gagal, kembalikan 0
 
 # Route untuk halaman utama
 @app.route("/status_server")
@@ -567,22 +571,22 @@ def status_server():
 @app.route("/status", methods=["GET"])
 def get_status():
     # Membaca data dari file JSON
-    with open('server.json') as f:
+    with open(SERVER_FILE, "r") as f:
         vps_list = json.load(f)
     
-    # Set max_user
-    max_user = 25
-
     # Memeriksa status masing-masing VPS
     for vps in vps_list:
+        # Periksa status VPS (ping)
         vps_status = check_vps_status(vps["hostname"])
         vps["status"] = vps_status["status"]
         vps["latency"] = vps_status["latency"]
         
+        # Ambil max_user dari field "limit" di JSON
+        vps["max_user"] = vps.get("limit", 25)  # Default ke 25 jika "limit" tidak ada
+        
         # Ambil current user menggunakan paramiko
-        current_users = get_current_users(vps["hostname"], vps["username"], vps["password"])  # Pastikan menambahkan username dan password di server.json
-        vps["current_users"] = current_users if current_users is not None else 0
-        vps["max_user"] = max_user
+        current_users = get_current_users(vps["hostname"], vps["username"], vps["password"])
+        vps["current_users"] = current_users
     
     return jsonify(vps_list)
 
