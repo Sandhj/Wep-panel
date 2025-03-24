@@ -426,7 +426,6 @@ def riwayat():
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # TAMBAH DAN HAPUS SERVER
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-
 # Lokasi file server.json (di folder yang sama dengan script)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_FILE = os.path.join(CURRENT_DIR, "server.json")
@@ -452,22 +451,29 @@ def add_server_temp():
 def add_server():
     try:
         # Ambil data dari form
-        name = request.form['name']
-        hostname = request.form['hostname']
-        username = request.form['username']
-        password = request.form['password']
+        name = request.form.get('name')
+        hostname = request.form.get('hostname')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        limit = request.form.get('limit')  # Ambil nilai limit dari form
 
         # Validasi input (contoh: semua field harus diisi)
-        if not all([name, hostname, username, password]):
+        if not all([name, hostname, username, password, limit]):
             flash("Semua field harus diisi!", "error")
-            return redirect(url_for('home'))
+            return redirect(url_for('add_server_temp'))
+
+        # Validasi format limit (misalnya, harus berupa angka integer)
+        if not limit.isdigit():
+            flash("Field 'Limit' harus berupa angka bulat!", "error")
+            return redirect(url_for('add_server_temp'))
 
         # Buat data server baru
         new_server = {
             "name": name,
             "hostname": hostname,
             "username": username,
-            "password": password
+            "password": password,  # Perhatikan: Password sebaiknya dienkripsi
+            "limit": int(limit)  # Konversi limit ke integer
         }
 
         # Load server list dan tambahkan server baru
@@ -683,4 +689,4 @@ def logout():
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=5003)
+    app.run(host="0.0.0.0", port=5007)
