@@ -2,8 +2,6 @@ echo -e "Silahkan Masukkan Data Web anda :"
 echo -e "══════════════════════⊹⊱≼≽⊰⊹══"
 read -p "Nama Folder :" identity
 read -p "Nama Admin :" admin
-read -p "Domain :" DOMAIN
-read -p "Port :" PORT
 read -p "Token Tele :" tele
 read -p "Id Tele :" idtele
 
