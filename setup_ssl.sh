@@ -1,4 +1,6 @@
 #Pasang Domain Dan SSL
+read -p "Domain :" DOMAIN
+read -p "Port :" PORT
 
 # Pastikan script dijalankan dengan akses root
 if [ "$(id -u)" -ne 0 ]; then
