@@ -10,7 +10,7 @@ export FLASK_IP=$(curl -s ifconfig.me)
 cd
 apt update 
 sudo apt install git
-apt install python3.11-venv
+apt install python3.8-venv
 
 LINK="https://raw.githubusercontent.com/Sandhj/Wep-panel/main/"
 
