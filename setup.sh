@@ -949,6 +949,11 @@ wget -q ${LINK}templates/Vpn/riwayat.html
 wget -q ${LINK}templates/deposit/deposit_form.html
 wget -q ${LINK}templates/deposit/payment_confirmation.html
 
+#Droplet
+wget -q ${LINK}templates/droplet/api_token.html
+wget -q ${LINK}templates/droplet/manage_droplet.html
+
+
 cd
 cd /root/$identity
 python3 -m venv web
