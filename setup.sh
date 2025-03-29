@@ -74,6 +74,14 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        # Tabel data api droplet digital ocean
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS api_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_name TEXT NOT NULL UNIQUE,
+                api_token TEXT NOT NULL
+            )
+        ''')
         db.commit()
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
