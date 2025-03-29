@@ -4,6 +4,7 @@ read -p "Nama Folder :" identity
 read -p "Nama Admin :" admin
 read -p "Token Tele :" tele
 read -p "Id Tele :" idtele
+read -p "port :" port
 
 export FLASK_IP=$(curl -s ifconfig.me)
 
@@ -913,7 +914,7 @@ def logout():
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=$PORT)
+    app.run(host="0.0.0.0", port=$port)
 EOL
 
 cd templates
