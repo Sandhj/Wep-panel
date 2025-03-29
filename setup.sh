@@ -1057,7 +1057,7 @@ if __name__ == "__main__":
         time.sleep(1)
 EOL
 
-cat <<EOL > root/$identity/run_b.sh
+cat <<EOL > /root/$identity/run_b.sh
 #!/bin/bash
 source /root/$identity/web/bin/activate
 python /root/$identity/backup.py
