@@ -755,7 +755,7 @@ def restore():
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 
 # Konfigurasi DigitalOcean API
-DIGITALOCEAN_API_URL = "https://api.digitalocean.com/v2" 
+DIGITALOCEAN_API_URL = "https://api.digitalocean.com/v2"
 
 def get_api_token(account_name):
     """Mengambil API token berdasarkan nama akun."""
@@ -765,14 +765,14 @@ def get_api_token(account_name):
     result = cursor.fetchone()
     return result["api_token"] if result else None
 
-@app.route("/api_token", methods=["GET"])
-def api_token():
+@app.route("/form_token", methods=["GET"])
+def form_token():
     """Halaman utama untuk menambahkan dan melihat API tokens."""
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT account_name FROM api_tokens")
     accounts = [row["account_name"] for row in cursor.fetchall()]
-    return render_template("api_token.html", accounts=accounts)
+    return render_template("form_token.html", accounts=accounts)
 
 @app.route("/add_token", methods=["POST"])
 def add_token():
@@ -782,7 +782,7 @@ def add_token():
 
     if not account_name or not api_token:
         flash("Nama akun dan API token harus diisi.", "error")
-        return redirect(url_for("api_token"))
+        return redirect(url_for("form_token"))
 
     db = get_db()
     cursor = db.cursor()
@@ -795,7 +795,7 @@ def add_token():
     finally:
         pass  # Koneksi database akan ditutup otomatis oleh @app.teardown_appcontext
 
-    return redirect(url_for("api_token"))
+    return redirect(url_for("form_token"))
 
 @app.route("/delete_token/<account_name>", methods=["POST"])
 def delete_token(account_name):
@@ -814,15 +814,15 @@ def delete_token(account_name):
     finally:
         pass  # Koneksi database akan ditutup otomatis oleh @app.teardown_appcontext
 
-    return redirect(url_for("api_token"))
+    return redirect(url_for("form_token"))
 
-@app.route("/manage/<account_name>", methods=["GET"])
-def manage_account(account_name):
+@app.route("/manage_droplet/<account_name>", methods=["GET"])
+def manage_account_droplet(account_name):
     """Halaman manajemen akun tertentu."""
     api_token = get_api_token(account_name)
     if not api_token:
         flash("Akun tidak ditemukan.", "error")
-        return redirect(url_for("api_token"))
+        return redirect(url_for("form_token"))
 
     headers = {
         "Authorization": f"Bearer {api_token}",
@@ -845,7 +845,7 @@ def create_droplet(account_name):
     api_token = get_api_token(account_name)
     if not api_token:
         flash("Akun tidak ditemukan.", "error")
-        return redirect(url_for("api_token"))
+        return redirect(url_for("form_token"))
 
     name = request.form.get("name")
     size = request.form.get("size")
@@ -871,7 +871,7 @@ def create_droplet(account_name):
     else:
         flash(f"Gagal membuat droplet: {response.json().get('message')}", "error")
 
-    return redirect(url_for("manage_account", account_name=account_name))
+    return redirect(url_for("manage_account_droplet", account_name=account_name))
 
 @app.route("/delete/<account_name>/<int:droplet_id>", methods=["POST"])
 def delete_droplet(account_name, droplet_id):
@@ -879,7 +879,7 @@ def delete_droplet(account_name, droplet_id):
     api_token = get_api_token(account_name)
     if not api_token:
         flash("Akun tidak ditemukan.", "error")
-        return redirect(url_for("api_token"))
+        return redirect(url_for("form_token"))
 
     headers = {
         "Authorization": f"Bearer {api_token}",
@@ -892,7 +892,7 @@ def delete_droplet(account_name, droplet_id):
     else:
         flash("Gagal menghapus droplet.", "error")
 
-    return redirect(url_for("manage_account", account_name=account_name))
+    return redirect(url_for("manage_account_droplet", account_name=account_name))
     
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RENEW ACCOUNT 
@@ -950,7 +950,7 @@ wget -q ${LINK}templates/deposit/deposit_form.html
 wget -q ${LINK}templates/deposit/payment_confirmation.html
 
 #Droplet
-wget -q ${LINK}templates/droplet/api_token.html
+wget -q ${LINK}templates/droplet/form_token.html
 wget -q ${LINK}templates/droplet/manage_droplet.html
 
 
