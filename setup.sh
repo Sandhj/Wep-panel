@@ -749,6 +749,150 @@ def restore():
                 status = "error"
 
     return render_template('restore.html', message=message, status=status)
+
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# DIGITAL OCEAN DROPLET MANAGE
+# ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+# Konfigurasi DigitalOcean API
+DIGITALOCEAN_API_URL = "https://api.digitalocean.com/v2" 
+
+def get_api_token(account_name):
+    """Mengambil API token berdasarkan nama akun."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT api_token FROM api_tokens WHERE account_name = ?", (account_name,))
+    result = cursor.fetchone()
+    return result["api_token"] if result else None
+
+@app.route("/api_token", methods=["GET"])
+def api_token():
+    """Halaman utama untuk menambahkan dan melihat API tokens."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT account_name FROM api_tokens")
+    accounts = [row["account_name"] for row in cursor.fetchall()]
+    return render_template("api_token.html", accounts=accounts)
+
+@app.route("/add_token", methods=["POST"])
+def add_token():
+    """Menambahkan API token baru ke database."""
+    account_name = request.form.get("account_name")
+    api_token = request.form.get("api_token")
+
+    if not account_name or not api_token:
+        flash("Nama akun dan API token harus diisi.", "error")
+        return redirect(url_for("api_token"))
+
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        cursor.execute("INSERT INTO api_tokens (account_name, api_token) VALUES (?, ?)", (account_name, api_token))
+        db.commit()
+        flash(f"API token untuk akun {account_name} berhasil ditambahkan.", "success")
+    except sqlite3.IntegrityError:
+        flash(f"Akun {account_name} sudah ada.", "error")
+    finally:
+        pass  # Koneksi database akan ditutup otomatis oleh @app.teardown_appcontext
+
+    return redirect(url_for("api_token"))
+
+@app.route("/delete_token/<account_name>", methods=["POST"])
+def delete_token(account_name):
+    """Menghapus API token dari database."""
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        cursor.execute("DELETE FROM api_tokens WHERE account_name = ?", (account_name,))
+        db.commit()
+        if cursor.rowcount > 0:
+            flash(f"API token untuk akun {account_name} berhasil dihapus.", "success")
+        else:
+            flash(f"Akun {account_name} tidak ditemukan.", "error")
+    except Exception as e:
+        flash(f"Gagal menghapus API token: {str(e)}", "error")
+    finally:
+        pass  # Koneksi database akan ditutup otomatis oleh @app.teardown_appcontext
+
+    return redirect(url_for("api_token"))
+
+@app.route("/manage/<account_name>", methods=["GET"])
+def manage_account(account_name):
+    """Halaman manajemen akun tertentu."""
+    api_token = get_api_token(account_name)
+    if not api_token:
+        flash("Akun tidak ditemukan.", "error")
+        return redirect(url_for("api_token"))
+
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+
+    # Mendapatkan daftar droplet
+    response = requests.get(f"{DIGITALOCEAN_API_URL}/droplets", headers=headers)
+    if response.status_code == 200:
+        droplets = response.json().get("droplets", [])
+    else:
+        droplets = []
+        flash("Gagal mengambil daftar droplet.", "error")
+
+    return render_template("manage_droplet.html", account_name=account_name, droplets=droplets)
+
+@app.route("/create/<account_name>", methods=["POST"])
+def create_droplet(account_name):
+    """Membuat droplet baru."""
+    api_token = get_api_token(account_name)
+    if not api_token:
+        flash("Akun tidak ditemukan.", "error")
+        return redirect(url_for("api_token"))
+
+    name = request.form.get("name")
+    size = request.form.get("size")
+    image = request.form.get("image")
+    password = request.form.get("password")
+
+    payload = {
+        "name": name,
+        "region": "sgp1",  # Singapura only
+        "size": size,
+        "image": image,
+        "user_data": f"#!/bin/bash\necho 'root:{password}' | chpasswd",  # Set password
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.post(f"{DIGITALOCEAN_API_URL}/droplets", headers=headers, json=payload)
+    if response.status_code == 202:
+        flash("Droplet berhasil dibuat!", "success")
+    else:
+        flash(f"Gagal membuat droplet: {response.json().get('message')}", "error")
+
+    return redirect(url_for("manage_account", account_name=account_name))
+
+@app.route("/delete/<account_name>/<int:droplet_id>", methods=["POST"])
+def delete_droplet(account_name, droplet_id):
+    """Menghapus droplet."""
+    api_token = get_api_token(account_name)
+    if not api_token:
+        flash("Akun tidak ditemukan.", "error")
+        return redirect(url_for("api_token"))
+
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.delete(f"{DIGITALOCEAN_API_URL}/droplets/{droplet_id}", headers=headers)
+    if response.status_code == 204:
+        flash("Droplet berhasil dihapus!", "success")
+    else:
+        flash("Gagal menghapus droplet.", "error")
+
+    return redirect(url_for("manage_account", account_name=account_name))
     
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RENEW ACCOUNT 
