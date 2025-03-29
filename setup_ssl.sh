@@ -8,6 +8,11 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+#install Nginx
+sudo apt update
+sudo apt install nginx -y
+sudo apt update
+
 
 # Lokasi file konfigurasi Nginx
 NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
