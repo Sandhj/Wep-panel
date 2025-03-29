@@ -968,6 +968,7 @@ pip install flask
 pip install requests
 pip install paramiko
 pip install pyTelegramBotAPI
+pip install schedule
 deactivate
 
 #══════════════════════════════
