@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Manage Droplets - {{ account_name }}</title>
+    <style>
+        /* Reset default margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* Container styling */
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heading styling */
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.delete {
+            background-color: #e74c3c;
+            margin-left: 10px;
+        }
+
+        button.delete:hover {
+            background-color: #c0392b;
+        }
+
+        /* Flash messages */
+        .flash {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .flash.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Droplet styling */
+        .droplet {
+            border: 1px solid #ecf0f1;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fafafa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .droplet h3 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .droplet p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        /* Responsive design */
+        @media (max-width: 800px) {
+            .container {
+                padding: 15px;
+            }
+
+            input, select, button {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Droplets - {{ account_name }}</h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Create Droplet Form -->
+        <h2>Create Droplet</h2>
+        <form action="{{ url_for('create_droplet', account_name=account_name) }}" method="POST">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="size">Size:</label>
+                <select id="size" name="size" required>
+                    <option value="s-1vcpu-1gb">1 CPU, 1GB RAM</option>
+                    <option value="s-2vcpu-2gb">2 CPU, 2GB RAM</option>
+                    <option value="s-2vcpu-4gb">2 CPU, 4GB RAM</option>
+                    <option value="s-4vcpu-8gb">4 CPU, 8GB RAM</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="image">Image:</label>
+                <select id="image" name="image" required>
+                    <option value="debian-11-x64">Debian 11</option>
+                    <option value="debian-12-x64">Debian 12</option>
+                    <option value="ubuntu-20-04-x64">Ubuntu 20.04</option>
+                    <option value="ubuntu-22-04-x64">Ubuntu 22.04</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" required>
+            </div>
+            <button type="submit">Create Droplet</button>
+        </form>
+
+        <!-- List Droplets -->
+        <h2>Droplets</h2>
+        {% if droplets %}
+            {% for droplet in droplets %}
+                <div class="droplet">
+                    <h3>{{ droplet.name }} (ID: {{ droplet.id }})</h3>
+                    <p>Status: {{ droplet.status }}</p>
+                    <p>Region: {{ droplet.region.slug }}</p>
+                    <p>Size: {{ droplet.size_slug }}</p>
+                    <p>IPv4 Address: 
+                        {% if droplet.networks.v4 %}
+                           {{ droplet.networks.v4[0].ip_address }}
+                        {% else %}
+                           Tidak tersedia
+                        {% endif %}
+                    </p>
+                    <form action="{{ url_for('delete_droplet', account_name=account_name, droplet_id=droplet.id) }}" method="POST">
+                        <button type="submit" class="delete" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #7f8c8d;">No droplets found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
