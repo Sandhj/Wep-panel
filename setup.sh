@@ -922,6 +922,9 @@ source /root/$identity/web/bin/activate
 python /root/$identity/app.py
 EOL
 
+#berikan izin eksekusi
+chmod +x run.sh
+
 #Home
 wget -q ${LINK}/templates/Home/login.html
 wget -q ${LINK}/templates/Home/register.html
@@ -1059,6 +1062,9 @@ cat <<EOL > root/$identity/run_b.sh
 source /root/$identity/web/bin/activate
 python /root/$identity/backup.py
 EOL
+
+#berikan izin eksekusi
+chmod +x run_b.sh
 
 #Buat Run Backup
 cat <<EOL > /etc/systemd/system/run_b.service
