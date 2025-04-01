@@ -660,7 +660,46 @@ def get_status():
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # REQUEST DEPOSIT. NOTIF KE BOT ADMIN TELE
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# Konfigurasi bot Telegram
+TELEGRAM_BOT_TOKEN = '$tele'
+TELEGRAM_CHAT_ID = '$idtele'
+bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 
+@app.route('/deposit', methods=['GET', 'POST'])
+def deposit():
+    # Pastikan session username sudah ada, jika tidak redirect ke halaman login
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Redirect ke halaman login jika session kosong
+
+    if request.method == 'POST':
+        # Ambil username dari session
+        username = session['username']
+        amount = request.form['amount']
+        return render_template('payment_confirmation.html', username=username, amount=amount)
+
+    return render_template('deposit_form.html')
+
+@app.route('/confirm', methods=['POST'])
+def confirm():
+    username = request.form['username']
+    amount = request.form['amount']
+    proof = request.files['proof']
+
+    if proof:
+        proof_path = os.path.join('static', proof.filename)
+        proof.save(proof_path)
+
+        # Kirim pesan ke bot Telegram
+        message = f"Permintaan Deposit.\nUsername: {username}\nJumlah: {amount}"
+        with open(proof_path, 'rb') as photo:
+            bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+            bot.send_photo(chat_id=TELEGRAM_CHAT_ID, photo=photo)
+
+        flash('Permintaan deposit telah berhasil dikirim ke admin.', 'success')
+        return redirect(url_for('deposit'))
+    else:
+        flash('Harap unggah bukti transfer.', 'danger')
+        return redirect(url_for('deposit'))
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # RESTORE DATA WEB
