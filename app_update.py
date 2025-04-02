@@ -9,6 +9,8 @@ import urllib.parse
 import telebot
 import zipfile
 import requests
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -885,6 +887,203 @@ def delete_droplet(account_name, droplet_id):
         flash("Gagal menghapus droplet.", "error")
 
     return redirect(url_for("manage_account_droplet", account_name=account_name))
+
+
+#══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+# RENEW SSH DAN XRAY
+#══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+
+def get_user_balance(username):
+    """Retrieve the balance of a user."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT balance FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()
+    return result["balance"] if result else None
+
+def deduct_user_balance(username, amount):
+    """Deduct a specified amount from the user's balance."""
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        current_balance = get_user_balance(username)
+        if current_balance is None or current_balance < amount:
+            return False  # Insufficient balance or user not found
+
+        new_balance = current_balance - amount
+        cursor.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, username))
+        db.commit()
+        return True
+    except Exception as e:
+        print(f"Error deducting balance: {e}")
+        db.rollback()
+        return False
+
+# Load server data from JSON
+def load_servers():
+    try:
+        with open('server.json', 'r') as file:
+            return json.load(file)
+    except Exception as e:
+        print(f"Error loading server.json: {e}")
+        return []
+
+# Execute a command on a remote server via SSH
+def execute_remote_command(server, command):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(server['hostname'], username=server['username'], password=server['password'])
+
+        stdin, stdout, stderr = ssh.exec_command(command)
+        output = stdout.read().decode().strip()
+        error = stderr.read().decode().strip()
+
+        ssh.close()
+
+        if error:
+            print(f"Error executing command: {error}")
+            return None
+        return output
+    except Exception as e:
+        print(f"Error connecting to remote server: {e}")
+        return None
+
+# Renew Xray Account
+@app.route("/renewxray", methods=["GET", "POST"])
+def renewxray():
+    servers = load_servers()  # Load server list from JSON
+    if request.method == "POST":
+        selected_server_name = request.form.get("server")
+        user = request.form.get("username").strip()
+        ip_count = int(request.form.get("ip_count"))
+        days = int(request.form.get("days"))
+
+        # Find the selected server details
+        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
+        if not selected_server:
+            flash("Invalid server selection.", "error")
+            return redirect(url_for("renewxray"))
+
+        # Validate input
+        if not user:
+            flash("Username cannot be empty!", "error")
+            return redirect(url_for("renewxray"))
+
+        # Define pricing based on IP count
+        ip_pricing = {
+            2: 5000,
+            5: 10000,
+            10: 20000
+        }
+
+        base_cost = ip_pricing.get(ip_count)
+        if not base_cost:
+            flash("Invalid IP count selected.", "error")
+            return redirect(url_for("renewxray"))
+
+        total_cost = (days // 30) * base_cost
+
+        # Deduct balance from user's account
+        if deduct_user_balance(user, total_cost):
+            # Get current expiration date
+            exp = get_current_expiration_ssh_xray(selected_server, user)
+            if not exp:
+                flash(f"User '{user}' does not exist or expiration date not found.", "error")
+                return redirect(url_for("renewxray"))
+
+            # Calculate new expiration date
+            try:
+                exp_date = datetime.strptime(exp, "%Y-%m-%d")
+                new_expiration = (exp_date + timedelta(days=days)).strftime("%Y-%m-%d")
+            except ValueError:
+                flash("Invalid expiration date format in config file.", "error")
+                return redirect(url_for("renewxray"))
+
+            # Update expiration date
+            if not update_expiration_ssh_xray(selected_server, user, new_expiration):
+                flash("Failed to update expiration date on the remote server.", "error")
+                return redirect(url_for("renewxray"))
+
+            # Restart Xray service
+            if not restart_xray_ssh(selected_server):
+                flash("Failed to restart Xray service on the remote server.", "error")
+                return redirect(url_for("renewxray"))
+
+            # Success message
+            flash(f"Expiration date for user '{user}' has been updated to {new_expiration} on server '{selected_server_name}'. Total cost: ${total_cost}.", "success")
+            return redirect(url_for("renewxray"))
+        else:
+            flash(f"Insufficient balance for user '{user}'. Please add funds.", "error")
+            return redirect(url_for("renewxray"))
+
+    return render_template("renewxray.html", servers=servers)
+
+# Renew SSH Account
+@app.route("/renewssh", methods=["GET", "POST"])
+def renewssh():
+    servers = load_servers()  # Load server list from JSON
+    if request.method == "POST":
+        selected_server_name = request.form.get("server")
+        user = request.form.get("username").strip()
+        ip_count = int(request.form.get("ip_count"))
+        days = int(request.form.get("days"))
+
+        # Find the selected server details
+        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
+        if not selected_server:
+            flash("Invalid server selection.", "error")
+            return redirect(url_for("renewssh"))
+
+        # Validate input
+        if not user:
+            flash("Username cannot be empty!", "error")
+            return redirect(url_for("renewssh"))
+
+        # Define pricing based on IP count
+        ip_pricing = {
+            2: 5000,
+            5: 10000,
+            10: 20000
+        }
+
+        base_cost = ip_pricing.get(ip_count)
+        if not base_cost:
+            flash("Invalid IP count selected.", "error")
+            return redirect(url_for("renewssh"))
+
+        total_cost = (days // 30) * base_cost
+
+        # Deduct balance from user's account
+        if deduct_user_balance(user, total_cost):
+            # Check if the user exists on the remote server
+            command = f"id {user}"
+            if execute_remote_command(selected_server, command) is None:
+                flash(f"User '{user}' does not exist on the remote server.", "error")
+                return redirect(url_for("renewssh"))
+
+            # Get current expiration date
+            current_expiration = get_current_expiration_ssh_user(selected_server, user)
+            if current_expiration is None:
+                current_expiration = datetime.now()
+
+            # Calculate new expiration date
+            new_expiration = current_expiration + timedelta(days=days)
+            new_expiration_display = new_expiration.strftime('%d %b %Y')
+
+            # Update expiration date
+            if not update_expiration_ssh_user(selected_server, user, new_expiration):
+                flash("Failed to update expiration date for user on the remote server.", "error")
+                return redirect(url_for("renewssh"))
+
+            # Success message
+            flash(f"Expiration date for user '{user}' has been updated to {new_expiration_display} on server '{selected_server_name}'. Total cost: ${total_cost}.", "success")
+            return redirect(url_for("renewssh"))
+        else:
+            flash(f"Insufficient balance for user '{user}'. Please add funds.", "error")
+            return redirect(url_for("renewssh"))
+
+    return render_template("renewssh.html", servers=servers)
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # KELUAR SESI ATAU LOGOUT
