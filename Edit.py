@@ -52,6 +52,38 @@ def update_expiration_ssh_xray(server, user, new_expiration):
     command = f"sed -i 's/^### {user} .*/### {user} {new_expiration}/' /etc/xray/config.json"
     return execute_remote_command(server, command) is not None
 
+# Function to get current expiration date for VLESS accounts
+def get_current_expiration_ssh_vless(server, user):
+    command = f"grep '#& {user}' /etc/xray/config.json"
+    output = execute_remote_command(server, command)
+
+    if output:
+        parts = output.split()
+        if len(parts) >= 3:
+            return parts[2]  # Expiration date
+    return None
+
+# Function to update expiration date for VLESS accounts
+def update_expiration_ssh_vless(server, user, new_expiration):
+    command = f"sed -i 's/^#& {user} .*/#& {user} {new_expiration}/' /etc/xray/config.json"
+    return execute_remote_command(server, command) is not None
+
+# Function to get current expiration date for Trojan accounts
+def get_current_expiration_ssh_trojan(server, user):
+    command = f"grep '#! {user}' /etc/xray/config.json"
+    output = execute_remote_command(server, command)
+
+    if output:
+        parts = output.split()
+        if len(parts) >= 3:
+            return parts[2]  # Expiration date
+    return None
+
+# Function to update expiration date for Trojan accounts
+def update_expiration_ssh_trojan(server, user, new_expiration):
+    command = f"sed -i 's/^#! {user} .*/#! {user} {new_expiration}/' /etc/xray/config.json"
+    return execute_remote_command(server, command) is not None
+
 # Function to restart Xray service using Paramiko
 def restart_xray_ssh(server):
     command = "systemctl restart xray"
@@ -134,6 +166,120 @@ def renewxray():
         return redirect(url_for("renewxray"))
 
     return render_template("renewxray.html", servers=servers)
+
+@app.route("/renewvless", methods=["GET", "POST"])
+def renewvless():
+    servers = load_servers()  # Load server list from JSON
+    if request.method == "POST":
+        selected_server_name = request.form.get("server")
+        user = request.form.get("username").strip()
+        masaaktif = request.form.get("days")
+
+        # Find the selected server details
+        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
+        if not selected_server:
+            flash("Invalid server selection.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Validate input
+        if not user:
+            flash("Username cannot be empty!", "error")
+            return redirect(url_for("renewvless"))
+        
+        try:
+            masaaktif = int(masaaktif)
+            if masaaktif <= 0:
+                raise ValueError
+        except ValueError:
+            flash("Invalid input. Please enter a valid number of days.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Get current expiration date
+        exp = get_current_expiration_ssh_vless(selected_server, user)
+        if not exp:
+            flash(f"User '{user}' does not exist or expiration date not found.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Calculate new expiration date
+        try:
+            exp_date = datetime.strptime(exp, "%Y-%m-%d")
+            new_expiration = (exp_date + timedelta(days=masaaktif)).strftime("%Y-%m-%d")
+        except ValueError:
+            flash("Invalid expiration date format in config file.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Update expiration date
+        if not update_expiration_ssh_vless(selected_server, user, new_expiration):
+            flash("Failed to update expiration date on the remote server.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Restart Xray service
+        if not restart_xray_ssh(selected_server):
+            flash("Failed to restart Xray service on the remote server.", "error")
+            return redirect(url_for("renewvless"))
+
+        # Success message
+        flash(f"Expiration date for VLESS user '{user}' has been updated to {new_expiration} on server '{selected_server_name}'. Xray service restarted successfully.", "success")
+        return redirect(url_for("renewvless"))
+
+    return render_template("renewvless.html", servers=servers)
+
+@app.route("/renewtrojan", methods=["GET", "POST"])
+def renewtrojan():
+    servers = load_servers()  # Load server list from JSON
+    if request.method == "POST":
+        selected_server_name = request.form.get("server")
+        user = request.form.get("username").strip()
+        masaaktif = request.form.get("days")
+
+        # Find the selected server details
+        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
+        if not selected_server:
+            flash("Invalid server selection.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Validate input
+        if not user:
+            flash("Username cannot be empty!", "error")
+            return redirect(url_for("renewtrojan"))
+        
+        try:
+            masaaktif = int(masaaktif)
+            if masaaktif <= 0:
+                raise ValueError
+        except ValueError:
+            flash("Invalid input. Please enter a valid number of days.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Get current expiration date
+        exp = get_current_expiration_ssh_trojan(selected_server, user)
+        if not exp:
+            flash(f"User '{user}' does not exist or expiration date not found.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Calculate new expiration date
+        try:
+            exp_date = datetime.strptime(exp, "%Y-%m-%d")
+            new_expiration = (exp_date + timedelta(days=masaaktif)).strftime("%Y-%m-%d")
+        except ValueError:
+            flash("Invalid expiration date format in config file.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Update expiration date
+        if not update_expiration_ssh_trojan(selected_server, user, new_expiration):
+            flash("Failed to update expiration date on the remote server.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Restart Xray service
+        if not restart_xray_ssh(selected_server):
+            flash("Failed to restart Xray service on the remote server.", "error")
+            return redirect(url_for("renewtrojan"))
+
+        # Success message
+        flash(f"Expiration date for Trojan user '{user}' has been updated to {new_expiration} on server '{selected_server_name}'. Xray service restarted successfully.", "success")
+        return redirect(url_for("renewtrojan"))
+
+    return render_template("renewtrojan.html", servers=servers)
 
 # Route for renewing SSH accounts
 @app.route("/renewssh", methods=["GET", "POST"])
