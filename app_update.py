@@ -11,7 +11,6 @@ import zipfile
 import requests
 from datetime import datetime, timedelta
 
-
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 DATABASE = "database.db"
@@ -902,44 +901,6 @@ def delete_droplet(account_name, droplet_id):
 #══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # DNS MANAGEMENT
 #══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-from flask import Flask, render_template, request, jsonify, redirect, url_for, g
-import sqlite3
-import requests
-
-app = Flask(__name__)
-
-# Konfigurasi database
-DATABASE = "cloudflare.db"
-
-# Fungsi untuk mendapatkan koneksi database
-def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row  # Menggunakan sqlite3.Row untuk hasil query sebagai dictionary
-    return db
-
-# Inisialisasi database
-def init_db():
-    with app.app_context():
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS credentials (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                api_token TEXT NOT NULL,
-                zone_id TEXT NOT NULL,
-                name TEXT NOT NULL
-            )
-        """)
-        db.commit()
-
-# Menutup koneksi database saat request selesai
-@app.teardown_appcontext
-def close_db(exception):
-    db = getattr(g, "_database", None)
-    if db is not None:
-        db.close()
 
 # Helper function untuk mendapatkan semua kredensial
 def get_credentials():
