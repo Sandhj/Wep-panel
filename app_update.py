@@ -63,6 +63,16 @@ def init_db():
                 api_token TEXT NOT NULL
             )
         ''')
+        # Tabel Data DNS
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS credentials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                api_token TEXT NOT NULL,
+                zone_id TEXT NOT NULL,
+                name TEXT NOT NULL
+            )
+        """)
+      
         db.commit()
         
 
@@ -890,208 +900,173 @@ def delete_droplet(account_name, droplet_id):
 
 
 #══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
-# RENEW SSH DAN XRAY
+# DNS MANAGEMENT
 #══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
+from flask import Flask, render_template, request, jsonify, redirect, url_for, g
+import sqlite3
+import requests
 
-def load_servers():
-    try:
-        with open('server.json', 'r') as file:
-            return json.load(file)
-    except Exception as e:
-        print(f"Error loading server.json: {e}")
-        return []
+app = Flask(__name__)
 
-def execute_remote_command(server, command):
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(server['hostname'], username=server['username'], password=server['password'])
+# Konfigurasi database
+DATABASE = "cloudflare.db"
 
-        stdin, stdout, stderr = ssh.exec_command(command)
-        output = stdout.read().decode().strip()
-        error = stderr.read().decode().strip()
+# Fungsi untuk mendapatkan koneksi database
+def get_db():
+    db = getattr(g, "_database", None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+        db.row_factory = sqlite3.Row  # Menggunakan sqlite3.Row untuk hasil query sebagai dictionary
+    return db
 
-        ssh.close()
-
-        if error:
-            print(f"Error executing command: {error}")
-            return None
-        return output
-    except Exception as e:
-        print(f"Error connecting to remote server: {e}")
-        return None
-
-# Renew Xray Account
-@app.route("/renewxray", methods=["GET", "POST"])
-def renewxray():
-    servers = load_servers()  # Load server list from JSON
-    if 'username' not in session:
-        flash("Silakan login terlebih dahulu.", "error")
-        return redirect('/login')
-
-    active_user = session['username']
-
-    if request.method == "POST":
-        selected_server_name = request.form.get("server")
-        user = request.form.get("username").strip()
-        device = request.form.get("device")
-        expired = int(request.form.get("expired"))
-
-        # Find the selected server details
-        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
-        if not selected_server:
-            flash("Invalid server selection.", "error")
-            return redirect(url_for("renewxray"))
-
-        # Validate input
-        if not user:
-            flash("Username cannot be empty!", "error")
-            return redirect(url_for("renewxray"))
-
-        # Cost logic
-        cost_per_device = {'hp': 5000, 'stb': 10000}  # Biaya per device
-        cost_per_expired = {30: 1, 60: 2, 90: 3, 120: 4}  # Faktor pengganda berdasarkan expired
-
-        if device not in cost_per_device or expired not in cost_per_expired:
-            flash("Invalid device or expired value.", "error")
-            return redirect(url_for("renewxray"))
-
-        total_cost = cost_per_device[device] * cost_per_expired[expired]
-
-        # Deduct balance
+# Inisialisasi database
+def init_db():
+    with app.app_context():
         db = get_db()
         cursor = db.cursor()
-
-        cursor.execute("SELECT balance FROM users WHERE username = ?", (active_user,))
-        user_data = cursor.fetchone()
-
-        if not user_data:
-            flash("Silakan login kembali dan coba lagi.", "error")
-            return redirect('/renewxray')
-
-        current_balance = user_data['balance']
-
-        if current_balance < total_cost:
-            flash("Saldo Kamu Tidak Mencukupi Untuk Melanjutkan Transaksi.", "error")
-            return redirect('/renewxray')
-
-        new_balance = current_balance - total_cost
-        cursor.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, active_user))
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS credentials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                api_token TEXT NOT NULL,
+                zone_id TEXT NOT NULL,
+                name TEXT NOT NULL
+            )
+        """)
         db.commit()
 
-        # Get current expiration date
-        exp = get_current_expiration_ssh_xray(selected_server, user)
-        if not exp:
-            flash(f"User '{user}' does not exist or expiration date not found.", "error")
-            return redirect(url_for("renewxray"))
+# Menutup koneksi database saat request selesai
+@app.teardown_appcontext
+def close_db(exception):
+    db = getattr(g, "_database", None)
+    if db is not None:
+        db.close()
 
-        # Calculate new expiration date
-        try:
-            exp_date = datetime.strptime(exp, "%Y-%m-%d")
-            new_expiration = (exp_date + timedelta(days=expired)).strftime("%Y-%m-%d")
-        except ValueError:
-            flash("Invalid expiration date format in config file.", "error")
-            return redirect(url_for("renewxray"))
+# Helper function untuk mendapatkan semua kredensial
+def get_credentials():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM credentials")
+    rows = cursor.fetchall()
+    return [dict(row) for row in rows]
 
-        # Update expiration date
-        if not update_expiration_ssh_xray(selected_server, user, new_expiration):
-            flash("Failed to update expiration date on the remote server.", "error")
-            return redirect(url_for("renewxray"))
+# Helper function untuk mendapatkan kredensial berdasarkan ID
+def get_credential_by_id(credential_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT api_token, zone_id FROM credentials WHERE id = ?", (credential_id,))
+    result = cursor.fetchone()
+    if result:
+        return dict(result)
+    return None
 
-        # Restart Xray service
-        if not restart_xray_ssh(selected_server):
-            flash("Failed to restart Xray service on the remote server.", "error")
-            return redirect(url_for("renewxray"))
+# Route untuk halaman utama
+@app.route("/subdo", methods=["GET"])
+def subdo():
+    credentials = get_credentials()
+    return render_template("subdo.html", credentials=credentials)
 
-        # Success message
-        flash(f"Expiration date for user '{user}' has been updated to {new_expiration}. Total cost: ${total_cost}. New balance: ${new_balance}.", "success")
-        return redirect(url_for("renewxray"))
+# Route untuk menambahkan kredensial baru
+@app.route("/add-credentials", methods=["POST"])
+def add_credentials():
+    api_token = request.form.get("api_token")
+    zone_id = request.form.get("zone_id")
+    name = request.form.get("name")
 
-    return render_template("renewxray.html", servers=servers)
+    if not api_token or not zone_id or not name:
+        return jsonify({"error": "Semua field harus diisi"}), 400
 
-# Renew SSH Account
-@app.route("/renewssh", methods=["GET", "POST"])
-def renewssh():
-    servers = load_servers()  # Load server list from JSON
-    if 'username' not in session:
-        flash("Silakan login terlebih dahulu.", "error")
-        return redirect('/login')
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO credentials (api_token, zone_id, name) VALUES (?, ?, ?)",
+        (api_token, zone_id, name),
+    )
+    db.commit()
 
-    active_user = session['username']
+    return redirect(url_for("subdo"))
 
-    if request.method == "POST":
-        selected_server_name = request.form.get("server")
-        user = request.form.get("username").strip()
-        device = request.form.get("device")
-        expired = int(request.form.get("expired"))
+# Route untuk menghapus kredensial
+@app.route("/delete-credentials/<int:credential_id>", methods=["DELETE"])
+def delete_credentials(credential_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM credentials WHERE id = ?", (credential_id,))
+    db.commit()
 
-        # Find the selected server details
-        selected_server = next((server for server in servers if server['name'] == selected_server_name), None)
-        if not selected_server:
-            flash("Invalid server selection.", "error")
-            return redirect(url_for("renewssh"))
+    return jsonify({"message": "Kredensial berhasil dihapus"})
 
-        # Validate input
-        if not user:
-            flash("Username cannot be empty!", "error")
-            return redirect(url_for("renewssh"))
+# Route untuk mendapatkan DNS records menggunakan kredensial tertentu
+@app.route("/records/<int:credential_id>", methods=["GET"])
+def get_records(credential_id):
+    credential = get_credential_by_id(credential_id)
+    if not credential:
+        return jsonify({"error": "Kredensial tidak ditemukan"}), 404
 
-        # Cost logic
-        cost_per_device = {'hp': 5000, 'stb': 10000}  # Biaya per device
-        cost_per_expired = {30: 1, 60: 2, 90: 3, 120: 4}  # Faktor pengganda berdasarkan expired
+    headers = {
+        "Authorization": f"Bearer {credential['api_token']}",
+        "Content-Type": "application/json",
+    }
+    url = f"https://api.cloudflare.com/client/v4/zones/{credential['zone_id']}/dns_records"
+    response = requests.get(url, headers=headers)
 
-        if device not in cost_per_device or expired not in cost_per_expired:
-            flash("Invalid device or expired value.", "error")
-            return redirect(url_for("renewssh"))
+    if response.status_code == 200:
+        records = response.json().get("result", [])
+        return jsonify(records)
+    else:
+        return jsonify({"error": "Gagal mengambil DNS records"}), response.status_code
 
-        total_cost = cost_per_device[device] * cost_per_expired[expired]
+# Route untuk menambahkan subdomain baru
+@app.route("/add/<int:credential_id>", methods=["POST"])
+def add_record(credential_id):
+    credential = get_credential_by_id(credential_id)
+    if not credential:
+        return jsonify({"error": "Kredensial tidak ditemukan"}), 404
 
-        # Deduct balance
-        db = get_db()
-        cursor = db.cursor()
+    data = request.json
+    subdomain = data.get("subdomain")
+    record_type = data.get("type", "A")
+    content = data.get("content")
 
-        cursor.execute("SELECT balance FROM users WHERE username = ?", (active_user,))
-        user_data = cursor.fetchone()
+    if not subdomain or not content:
+        return jsonify({"error": "Subdomain dan content harus diisi"}), 400
 
-        if not user_data:
-            flash("Silakan login kembali dan coba lagi.", "error")
-            return redirect('/renewssh')
+    headers = {
+        "Authorization": f"Bearer {credential['api_token']}",
+        "Content-Type": "application/json",
+    }
+    url = f"https://api.cloudflare.com/client/v4/zones/{credential['zone_id']}/dns_records"
+    payload = {
+        "type": record_type,
+        "name": subdomain,
+        "content": content,
+        "ttl": 1,
+        "proxied": False,
+    }
+    response = requests.post(url, headers=headers, json=payload)
 
-        current_balance = user_data['balance']
+    if response.status_code == 200:
+        return jsonify({"message": "Subdomain berhasil ditambahkan"})
+    else:
+        return jsonify({"error": "Gagal menambahkan subdomain"}), response.status_code
 
-        if current_balance < total_cost:
-            flash("Saldo Kamu Tidak Mencukupi Untuk Melanjutkan Transaksi.", "error")
-            return redirect('/renewssh')
+# Route untuk menghapus subdomain
+@app.route("/delete/<int:credential_id>/<record_id>", methods=["DELETE"])
+def delete_record(credential_id, record_id):
+    credential = get_credential_by_id(credential_id)
+    if not credential:
+        return jsonify({"error": "Kredensial tidak ditemukan"}), 404
 
-        new_balance = current_balance - total_cost
-        cursor.execute("UPDATE users SET balance = ? WHERE username = ?", (new_balance, active_user))
-        db.commit()
+    headers = {
+        "Authorization": f"Bearer {credential['api_token']}",
+        "Content-Type": "application/json",
+    }
+    url = f"https://api.cloudflare.com/client/v4/zones/{credential['zone_id']}/dns_records/{record_id}"
+    response = requests.delete(url, headers=headers)
 
-        # Check if the user exists on the remote server
-        command = f"id {user}"
-        if execute_remote_command(selected_server, command) is None:
-            flash(f"User '{user}' does not exist on the remote server.", "error")
-            return redirect(url_for("renewssh"))
-
-        # Get current expiration date
-        current_expiration = get_current_expiration_ssh_user(selected_server, user)
-        if current_expiration is None:
-            current_expiration = datetime.now()
-
-        # Calculate new expiration date
-        new_expiration = current_expiration + timedelta(days=expired)
-        new_expiration_display = new_expiration.strftime('%d %b %Y')
-
-        # Update expiration date
-        if not update_expiration_ssh_user(selected_server, user, new_expiration):
-            flash("Failed to update expiration date for user on the remote server.", "error")
-            return redirect(url_for("renewssh"))
-
-        # Success message
-        flash(f"Expiration date for user '{user}' has been updated to {new_expiration_display}. Total cost: ${total_cost}. New balance: ${new_balance}.", "success")
-        return redirect(url_for("renewssh"))
-
-    return render_template("renewssh.html", servers=servers)
+    if response.status_code == 200:
+        return jsonify({"message": "Subdomain berhasil dihapus"})
+    else:
+        return jsonify({"error": "Gagal menghapus subdomain"}), response.status_code
 
 # ══════════════════════════════⊹⊱≼≽⊰⊹══════════════════════════════
 # KELUAR SESI ATAU LOGOUT
